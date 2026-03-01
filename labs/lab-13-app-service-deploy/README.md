@@ -46,10 +46,19 @@ Der App-Name folgt dem Muster `app-training-teilnehmerNN` (z. B.
 **Standard (S1)**-Plan namens `plan-training-standard` in der Resource Group
 `rg-pipeline-training`.
 
+**Bash:**
 ```bash
 # Setze deinen App-Namen (ersetze NN mit deiner Teilnehmernummer)
 APP_NAME="app-training-teilnehmerNN"
+```
 
+**PowerShell:**
+```powershell
+# Setze deinen App-Namen (ersetze NN mit deiner Teilnehmernummer)
+$APP_NAME = "app-training-teilnehmerNN"
+```
+
+```bash
 # Prüfe, ob die App existiert und erreichbar ist
 az webapp show --name $APP_NAME --resource-group rg-pipeline-training --query "state" -o tsv
 echo "App URL: https://$APP_NAME.azurewebsites.net"
@@ -323,12 +332,22 @@ Pipeline-Run im Browser und klicke gegebenenfalls auf **"Permit"**.
 Nach erfolgreichem Deployment sollte die App unter der Azure-URL erreichbar
 sein. Prüfe sowohl die Hauptseite als auch den Health-Endpoint:
 
+**Bash:**
 ```bash
 # Health Endpoint prüfen
 curl https://$APP_NAME.azurewebsites.net/health
 
 # Hauptseite prüfen (sollte index.html oder Fallback anzeigen)
 curl https://$APP_NAME.azurewebsites.net
+```
+
+**PowerShell:**
+```powershell
+# Health Endpoint prüfen
+Invoke-RestMethod https://$APP_NAME.azurewebsites.net/health
+
+# Hauptseite prüfen (sollte index.html oder Fallback anzeigen)
+Invoke-RestMethod https://$APP_NAME.azurewebsites.net
 ```
 
 Öffne die URL `https://<dein-app-name>.azurewebsites.net` auch im Browser, um
