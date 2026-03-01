@@ -64,17 +64,34 @@ DevOps-Team dieses Repository.
 ```bash
 # Neues Repository für Templates erstellen
 az repos create --name "pipeline-templates" --output table
+```
 
+**Bash:**
+```bash
 # Klonen
 cd ~
 git clone https://dev.azure.com/<organisations-name>/pipeline-labs/_git/pipeline-templates
 cd pipeline-templates
 ```
 
+**PowerShell:**
+```powershell
+# Klonen
+Set-Location $HOME
+git clone https://dev.azure.com/<organisations-name>/pipeline-labs/_git/pipeline-templates
+Set-Location pipeline-templates
+```
+
 Erstelle die Verzeichnisstruktur für die verschiedenen Template-Typen:
 
+**Bash:**
 ```bash
 mkdir -p steps jobs stages variables
+```
+
+**PowerShell:**
+```powershell
+New-Item -ItemType Directory -Force -Path steps, jobs, stages, variables | Out-Null
 ```
 
 ### Schritt 2: Step-Templates erstellen
@@ -384,8 +401,14 @@ Jetzt wechseln wir zurück zum Anwendungs-Repository und binden die Templates
 aus dem Template-Repository ein. Die Verbindung zwischen den Repositories
 wird über `resources.repositories` hergestellt.
 
+**Bash:**
 ```bash
 cd ~/hello-pipeline
+```
+
+**PowerShell:**
+```powershell
+Set-Location $HOME/hello-pipeline
 ```
 
 Ersetze den Inhalt von `azure-pipelines.yml`:

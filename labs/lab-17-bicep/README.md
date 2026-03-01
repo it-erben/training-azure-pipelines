@@ -195,6 +195,8 @@ Bevor wir die Pipeline erstellen, kannst du das Bicep-Template lokal prüfen.
 Syntaxfehler. `az deployment group what-if` zeigt eine Vorschau der
 Änderungen, ohne sie tatsächlich durchzuführen:
 
+**Bash:**
+
 ```bash
 # Bicep-Syntax prüfen (kompiliert zu ARM-JSON)
 az bicep build --file bicep/main.bicep
@@ -204,6 +206,20 @@ az deployment group what-if \
   --resource-group rg-pipeline-training \
   --template-file bicep/main.bicep \
   --parameters bicep/dev.parameters.json \
+  --parameters uniqueSuffix="<dein-kürzel>"
+```
+
+**PowerShell:**
+
+```powershell
+# Bicep-Syntax prüfen (kompiliert zu ARM-JSON)
+az bicep build --file bicep/main.bicep
+
+# What-If Deployment (Vorschau der Änderungen)
+az deployment group what-if `
+  --resource-group rg-pipeline-training `
+  --template-file bicep/main.bicep `
+  --parameters bicep/dev.parameters.json `
   --parameters uniqueSuffix="<dein-kürzel>"
 ```
 
@@ -405,12 +421,25 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
 Ersetze den Platzhalter in der Pipeline-Datei und in der Parameter-Datei mit
 deinem persönlichen Kürzel:
 
+**Bash:**
+
 ```bash
 # Platzhalter in Pipeline und Parameter-Datei ersetzen
 SUFFIX=$(whoami | head -c 3)
 sed -i "s/<dein-kürzel>/$SUFFIX/g" azure-pipelines.yml
 sed -i "s/REPLACE_WITH_YOUR_SUFFIX/$SUFFIX/g" bicep/dev.parameters.json
+```
 
+**PowerShell:**
+
+```powershell
+# Platzhalter in Pipeline und Parameter-Datei ersetzen
+$SUFFIX = ($env:USERNAME).Substring(0,3)
+(Get-Content azure-pipelines.yml) -replace '<dein-kürzel>',$SUFFIX | Set-Content azure-pipelines.yml
+(Get-Content bicep/dev.parameters.json) -replace 'REPLACE_WITH_YOUR_SUFFIX',$SUFFIX | Set-Content bicep/dev.parameters.json
+```
+
+```bash
 git add bicep/main.bicep bicep/dev.parameters.json azure-pipelines.yml
 git commit -m "Add Bicep IaC pipeline"
 git push origin main
@@ -429,6 +458,8 @@ Beobachte den Pipeline-Run im Browser. Die vier Stages laufen nacheinander:
 
 Prüfe per CLI, ob die Ressourcen korrekt erstellt wurden:
 
+**Bash:**
+
 ```bash
 # Deployment-Liste prüfen
 az deployment group list --resource-group rg-pipeline-training --output table
@@ -437,6 +468,19 @@ az deployment group list --resource-group rg-pipeline-training --output table
 az resource list \
   --resource-group rg-pipeline-training \
   --query "[?tags.ManagedBy=='bicep']" \
+  --output table
+```
+
+**PowerShell:**
+
+```powershell
+# Deployment-Liste prüfen
+az deployment group list --resource-group rg-pipeline-training --output table
+
+# Von Bicep erstellte Ressourcen anzeigen
+az resource list `
+  --resource-group rg-pipeline-training `
+  --query "[?tags.ManagedBy=='bicep']" `
   --output table
 ```
 
@@ -470,12 +514,27 @@ Resource changes: 2 to create
 
 ## Aufräumen
 
+**Bash:**
+
 ```bash
 # Alle mit Bicep erstellten Ressourcen löschen
 az resource list \
   --resource-group rg-pipeline-training \
   --query "[?tags.ManagedBy=='bicep'].id" -o tsv | \
   xargs -I {} az resource delete --ids {}
+
+# Oder die gesamte Ressourcengruppe, wenn sie nur Bicep-Ressourcen enthält
+# az group delete --name rg-training-app-dev --yes
+```
+
+**PowerShell:**
+
+```powershell
+# Alle mit Bicep erstellten Ressourcen löschen
+az resource list `
+  --resource-group rg-pipeline-training `
+  --query "[?tags.ManagedBy=='bicep'].id" -o tsv |
+  ForEach-Object { az resource delete --ids $_ }
 
 # Oder die gesamte Ressourcengruppe, wenn sie nur Bicep-Ressourcen enthält
 # az group delete --name rg-training-app-dev --yes

@@ -51,11 +51,26 @@ Account, in dem der Terraform State gespeichert wird. Storage-Account-Namen
 müssen global eindeutig sein und dürfen nur Kleinbuchstaben und Zahlen
 enthalten.
 
+**Bash:**
+
 ```bash
 # Eindeutigen Storage Account Namen generieren
 STORAGE_NAME="sttraining$(whoami | tr -dc 'a-z0-9' | head -c 4)$(date +%m%d)"
 echo "Storage Account: $STORAGE_NAME"
+```
 
+**PowerShell:**
+
+```powershell
+# Eindeutigen Storage Account Namen generieren
+$user = ($env:USERNAME).ToLower() -replace '[^a-z0-9]',''
+$STORAGE_NAME = "sttraining$($user.Substring(0,[Math]::Min(4,$user.Length)))$(Get-Date -Format 'MMdd')"
+echo "Storage Account: $STORAGE_NAME"
+```
+
+**Bash:**
+
+```bash
 # Storage Account erstellen
 az storage account create \
   --name $STORAGE_NAME \
@@ -68,6 +83,27 @@ az storage account create \
 az storage container create \
   --name tfstate \
   --account-name $STORAGE_NAME \
+  --output table
+
+echo "Storage Account erstellt: $STORAGE_NAME"
+echo "Container: tfstate"
+```
+
+**PowerShell:**
+
+```powershell
+# Storage Account erstellen
+az storage account create `
+  --name $STORAGE_NAME `
+  --resource-group rg-pipeline-training `
+  --location westeurope `
+  --sku Standard_LRS `
+  --output table
+
+# Container für Terraform State erstellen
+az storage container create `
+  --name tfstate `
+  --account-name $STORAGE_NAME `
   --output table
 
 echo "Storage Account erstellt: $STORAGE_NAME"
@@ -467,6 +503,8 @@ der Fehlermeldung "TerraformTaskV4 not found" fehl.
 Ersetze die Platzhalter in der Pipeline-Datei und in der `dev.tfvars`-Datei.
 Ersetze auch `REPLACE_ME` in der `dev.tfvars` mit deinem Kürzel:
 
+**Bash:**
+
 ```bash
 # Platzhalter in der Pipeline ersetzen
 sed -i "s/<dein-storage-account>/$STORAGE_NAME/g" azure-pipelines.yml
@@ -474,7 +512,21 @@ sed -i "s/<dein-kürzel>/$(whoami | head -c 3)/g" azure-pipelines.yml
 
 # Platzhalter in dev.tfvars ersetzen
 sed -i "s/REPLACE_ME/$(whoami | head -c 3)/g" terraform/dev.tfvars
+```
 
+**PowerShell:**
+
+```powershell
+# Platzhalter in der Pipeline ersetzen
+$SUFFIX = ($env:USERNAME).Substring(0,3)
+(Get-Content azure-pipelines.yml) -replace '<dein-storage-account>',$STORAGE_NAME | Set-Content azure-pipelines.yml
+(Get-Content azure-pipelines.yml) -replace '<dein-kürzel>',$SUFFIX | Set-Content azure-pipelines.yml
+
+# Platzhalter in dev.tfvars ersetzen
+(Get-Content terraform/dev.tfvars) -replace 'REPLACE_ME',$SUFFIX | Set-Content terraform/dev.tfvars
+```
+
+```bash
 git add terraform/main.tf terraform/variables.tf terraform/outputs.tf terraform/dev.tfvars azure-pipelines.yml
 git commit -m "Add Terraform IaC pipeline"
 git push origin main
@@ -494,11 +546,26 @@ Beobachte den Pipeline-Run im Browser:
 
 Prüfe per CLI, ob State und Ressourcen korrekt erstellt wurden:
 
+**Bash:**
+
 ```bash
 # Terraform State im Storage Account prüfen (sollte einen Blob zeigen)
 az storage blob list \
   --account-name $STORAGE_NAME \
   --container-name tfstate \
+  --output table
+
+# Erstellte Ressourcen in der neuen Resource Group prüfen
+az resource list --resource-group rg-training-app-dev --output table
+```
+
+**PowerShell:**
+
+```powershell
+# Terraform State im Storage Account prüfen (sollte einen Blob zeigen)
+az storage blob list `
+  --account-name $STORAGE_NAME `
+  --container-name tfstate `
   --output table
 
 # Erstellte Ressourcen in der neuen Resource Group prüfen
@@ -543,6 +610,8 @@ werden. Verwende `terraform destroy`, um die Ressourcen sauber über Terraform
 zu entfernen (statt sie manuell im Portal zu löschen — sonst gerät der State
 aus dem Takt):
 
+**Bash:**
+
 ```bash
 # Terraform Destroy (lokal ausführen)
 cd ~/hello-pipeline/terraform
@@ -553,6 +622,23 @@ terraform init \
   -backend-config="key=training.terraform.tfstate"
 
 terraform destroy -var-file=dev.tfvars -var="unique_suffix=$(whoami | head -c 3)" -auto-approve
+
+# Storage Account für Terraform State löschen
+az storage account delete --name $STORAGE_NAME --resource-group rg-pipeline-training --yes
+```
+
+**PowerShell:**
+
+```powershell
+# Terraform Destroy (lokal ausführen)
+cd ~/hello-pipeline/terraform
+terraform init `
+  -backend-config="resource_group_name=rg-pipeline-training" `
+  -backend-config="storage_account_name=$STORAGE_NAME" `
+  -backend-config="container_name=tfstate" `
+  -backend-config="key=training.terraform.tfstate"
+
+terraform destroy -var-file=dev.tfvars -var="unique_suffix=$($env:USERNAME.Substring(0,3))" -auto-approve
 
 # Storage Account für Terraform State löschen
 az storage account delete --name $STORAGE_NAME --resource-group rg-pipeline-training --yes

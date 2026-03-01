@@ -65,10 +65,20 @@ Deine Web App (`app-training-teilnehmerNN`) läuft bereits auf einem S1-Plan,
 der Deployment Slots unterstützt. In diesem Schritt erstellst du den
 Staging-Slot und konfigurierst Slot-Sticky Settings.
 
+**Bash:**
 ```bash
 # Setze deinen App-Namen (ersetze NN mit deiner Teilnehmernummer)
 APP_NAME="app-training-teilnehmerNN"
+```
 
+**PowerShell:**
+```powershell
+# Setze deinen App-Namen (ersetze NN mit deiner Teilnehmernummer)
+$APP_NAME = "app-training-teilnehmerNN"
+```
+
+**Bash:**
+```bash
 # Staging Slot erstellen
 az webapp deployment slot create \
   --name $APP_NAME \
@@ -86,6 +96,31 @@ az webapp config appsettings set \
   --name $APP_NAME --resource-group rg-pipeline-training \
   --slot staging \
   --settings SLOT_NAME=staging \
+  --slot-settings SLOT_NAME
+
+echo "Production URL: https://$APP_NAME.azurewebsites.net"
+echo "Staging URL:    https://$APP_NAME-staging.azurewebsites.net"
+```
+
+**PowerShell:**
+```powershell
+# Staging Slot erstellen
+az webapp deployment slot create `
+  --name $APP_NAME `
+  --resource-group rg-pipeline-training `
+  --slot staging `
+  --output table
+
+# Slot-sticky Settings: SLOT_NAME bleibt beim Swap am jeweiligen Slot
+az webapp config appsettings set `
+  --name $APP_NAME --resource-group rg-pipeline-training `
+  --settings SLOT_NAME=production `
+  --slot-settings SLOT_NAME
+
+az webapp config appsettings set `
+  --name $APP_NAME --resource-group rg-pipeline-training `
+  --slot staging `
+  --settings SLOT_NAME=staging `
   --slot-settings SLOT_NAME
 
 echo "Production URL: https://$APP_NAME.azurewebsites.net"
@@ -175,8 +210,14 @@ az webapp up --name $APP_NAME --resource-group rg-pipeline-training --runtime "N
 
 Prüfe, ob die App läuft:
 
+**Bash:**
 ```bash
 curl https://$APP_NAME.azurewebsites.net/health
+```
+
+**PowerShell:**
+```powershell
+Invoke-RestMethod https://$APP_NAME.azurewebsites.net/health
 ```
 
 Du solltest diese Antwort sehen:
@@ -415,12 +456,22 @@ Nachdem die Pipeline v2 in den Staging-Slot deployt hat (aber **vor** dem Swap),
 laufen zwei verschiedene Versionen nebeneinander — das ist der Kern von
 Blue/Green Deployment:
 
+**Bash:**
 ```bash
 # Production: v1 (Blue) — die alte, stabile Version
 curl https://$APP_NAME.azurewebsites.net/health
 
 # Staging: v2 (Green) — die neue Version
 curl https://$APP_NAME-staging.azurewebsites.net/health
+```
+
+**PowerShell:**
+```powershell
+# Production: v1 (Blue) — die alte, stabile Version
+Invoke-RestMethod https://$APP_NAME.azurewebsites.net/health
+
+# Staging: v2 (Green) — die neue Version
+Invoke-RestMethod https://$APP_NAME-staging.azurewebsites.net/health
 ```
 
 Öffne beide URLs auch im Browser:
@@ -439,12 +490,22 @@ wechselt der Traffic.
 Nachdem du den Swap freigegeben hast (oder falls kein Approval Gate konfiguriert
 ist: automatisch), tauschen die Slots. Prüfe danach beide URLs erneut:
 
+**Bash:**
 ```bash
 # Production: jetzt v2 (neue Version)
 curl https://$APP_NAME.azurewebsites.net/health
 
 # Staging: jetzt v1 (alte Version — bereit für Rollback)
 curl https://$APP_NAME-staging.azurewebsites.net/health
+```
+
+**PowerShell:**
+```powershell
+# Production: jetzt v2 (neue Version)
+Invoke-RestMethod https://$APP_NAME.azurewebsites.net/health
+
+# Staging: jetzt v1 (alte Version — bereit für Rollback)
+Invoke-RestMethod https://$APP_NAME-staging.azurewebsites.net/health
 ```
 
 Erwartete Ergebnisse:
@@ -464,6 +525,7 @@ Slot, nicht dem Code, weil `SLOT_NAME` slot-sticky ist.
 Ein großer Vorteil von Blue/Green Deployments: Der Rollback ist ein erneuter
 Swap — keine erneute Build/Deploy-Kette nötig. Teste das manuell:
 
+**Bash:**
 ```bash
 # Erneuter Swap: Production und Staging werden wieder getauscht
 az webapp deployment slot swap \
@@ -474,6 +536,19 @@ az webapp deployment slot swap \
 
 # Prüfe, ob die alte Version wieder in Production ist
 curl https://$APP_NAME.azurewebsites.net/health
+```
+
+**PowerShell:**
+```powershell
+# Erneuter Swap: Production und Staging werden wieder getauscht
+az webapp deployment slot swap `
+  --name $APP_NAME `
+  --resource-group rg-pipeline-training `
+  --slot staging `
+  --target-slot production
+
+# Prüfe, ob die alte Version wieder in Production ist
+Invoke-RestMethod https://$APP_NAME.azurewebsites.net/health
 ```
 
 Der Rollback dauert nur wenige Sekunden, da kein erneutes Deployment

@@ -85,7 +85,9 @@ Der Azure Pipelines Agent ist ein portabler Prozess, der auf Linux, macOS und
 Windows läuft. Du lädst ein Archiv herunter, entpackst es und konfigurierst
 den Agent — keine Installation im klassischen Sinne nötig.
 
-Öffne ein Terminal (oder Git Bash auf Windows) und führe folgende Befehle aus:
+Öffne ein Terminal und führe folgende Befehle aus:
+
+**Bash:**
 
 ```bash
 # Verzeichnis für den Agent erstellen
@@ -96,13 +98,25 @@ mkdir -p ~/azagent && cd ~/azagent
 curl -fkSL -o vsts-agent-linux-x64.tar.gz \
   https://vstsagentpackage.azureedge.net/agent/3.248.0/vsts-agent-linux-x64-3.248.0.tar.gz
 
-# Falls du auf Windows mit Git Bash arbeitest, verwende stattdessen:
-# curl -fkSL -o vsts-agent-win-x64.zip \
-#   https://vstsagentpackage.azureedge.net/agent/3.248.0/vsts-agent-win-x64-3.248.0.zip
-# unzip vsts-agent-win-x64.zip
-
-# Auf Linux: Entpacken
+# Entpacken
 tar zxvf vsts-agent-linux-x64.tar.gz
+```
+
+**PowerShell:**
+
+```powershell
+# Verzeichnis für den Agent erstellen
+New-Item -ItemType Directory -Force -Path $HOME\azagent | Out-Null
+Set-Location $HOME\azagent
+
+# Agent herunterladen (aktuelle Version prüfen unter:
+# https://github.com/microsoft/azure-pipelines-agent/releases)
+Invoke-WebRequest -Uri `
+  https://vstsagentpackage.azureedge.net/agent/3.248.0/vsts-agent-win-x64-3.248.0.zip `
+  -OutFile vsts-agent-win-x64.zip
+
+# Entpacken
+Expand-Archive -Path vsts-agent-win-x64.zip -DestinationPath .
 ```
 
 Nach dem Entpacken siehst du mehrere Dateien, darunter `config.sh` (bzw.
@@ -114,6 +128,8 @@ beiden Hauptskripte: eines zum Konfigurieren und eines zum Starten des Agents.
 Die Konfiguration verbindet den Agent mit deiner Azure DevOps Organisation und
 registriert ihn im Agent Pool. Du brauchst die Organisation-URL, den PAT aus
 Schritt 2 und den Pool-Namen aus Schritt 1.
+
+**Bash:**
 
 ```bash
 # Konfiguration starten
@@ -128,12 +144,19 @@ Schritt 2 und den Pool-Namen aus Schritt 1.
 # Work folder:   _work (oder Enter für Standard)
 ```
 
-**Auf Windows mit Git Bash:**
+**PowerShell:**
 
-```bash
-./config.cmd
+```powershell
+# Konfiguration starten
+.\config.cmd
 
-# Gleiche Fragen wie oben
+# Du wirst nach folgenden Informationen gefragt:
+# Server URL:    https://dev.azure.com/<organisations-name>
+# Authentication: PAT (Enter drücken für Default)
+# Token:         <dein-pat-token>
+# Agent Pool:    linux-training-pool
+# Agent Name:    training-agent-01 (oder Enter für Standardnamen)
+# Work folder:   _work (oder Enter für Standard)
 ```
 
 Die Konfiguration speichert die Verbindungsdaten lokal in `.credentials`- und
@@ -145,12 +168,22 @@ der Agent ihn gegen ein OAuth-Token, das automatisch erneuert wird.
 Starte den Agent interaktiv in einem eigenen Terminal-Fenster. Der Agent
 verbindet sich mit Azure DevOps und wartet auf Jobs:
 
+**Bash:**
+
 ```bash
 # Interaktiv starten (für Testzwecke)
 ./run.sh
 
-# Auf Windows:
-# ./run.cmd
+# Du siehst:
+# Starting Agent listener...
+# Listening for Jobs
+```
+
+**PowerShell:**
+
+```powershell
+# Interaktiv starten (für Testzwecke)
+.\run.cmd
 
 # Du siehst:
 # Starting Agent listener...
@@ -375,6 +408,8 @@ zwischen den Agent-Typen zusammen.
 Nach dem Lab solltest du den Agent sauber deregistrieren, damit er nicht als
 "Offline" im Pool hängen bleibt.
 
+**Bash:**
+
 ```bash
 # Agent stoppen (wenn interaktiv)
 # Ctrl+C im Agent-Terminal
@@ -388,6 +423,23 @@ sudo ./svc.sh uninstall
 
 # Agent-Verzeichnis löschen
 cd ~ && rm -rf azagent
+
+# Agent Pool löschen (optional)
+# Organization Settings > Agent pools > linux-training-pool > Delete
+```
+
+**PowerShell:**
+
+```powershell
+# Agent stoppen (wenn interaktiv)
+# Ctrl+C im Agent-Terminal
+
+# Agent-Konfiguration entfernen (deregistriert den Agent aus dem Pool)
+.\config.cmd remove --auth pat --token <dein-pat-token>
+
+# Agent-Verzeichnis löschen
+Set-Location $HOME
+Remove-Item -Recurse -Force azagent
 
 # Agent Pool löschen (optional)
 # Organization Settings > Agent pools > linux-training-pool > Delete
