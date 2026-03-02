@@ -179,7 +179,7 @@ const server = http.createServer((req, res) => {
     <!DOCTYPE html>
     <html>
     <head><title>Hello Pipeline - v${APP_VERSION}</title></head>
-    <body style="font-family: Arial; padding: 40px; background: ${SLOT_NAME === 'staging' ? '#fff3cd' : '#d4edda'};">
+    <body style="font-family: Arial; padding: 40px; background: ${SLOT_NAME === 'staging' ? '#d4edda' : '#cce5ff'};">
       <h1>Hello from Azure Pipelines!</h1>
       <p><strong>Version:</strong> ${APP_VERSION}</p>
       <p><strong>Slot:</strong> ${SLOT_NAME}</p>
@@ -203,8 +203,8 @@ Der Server liest zwei Umgebungsvariablen:
   App-Setting, das wir in Schritt 1 konfiguriert haben.
 
 Die Hauptseite zeigt je nach Slot eine unterschiedliche Hintergrundfarbe:
-**Gelb für Staging**, **Grün für Production**. So siehst du im Browser auf einen
-Blick, welcher Slot gerade aktiv ist.
+**Grün für Staging (Green)**, **Blau für Production (Blue)**. So siehst du im
+Browser auf einen Blick, welcher Slot gerade aktiv ist.
 
 ### Schritt 3: Version 1 nach Production deployen
 
@@ -238,7 +238,7 @@ Du solltest diese Antwort sehen:
 ```
 
 Öffne auch `https://<app-name>.azurewebsites.net` im Browser: Du siehst die
-Seite mit **grünem Hintergrund**, dem Titel "Hello from Azure Pipelines!" und
+Seite mit **blauem Hintergrund**, dem Titel "Hello from Azure Pipelines!" und
 `Slot: production`. Das ist deine stabile Blue-Version.
 
 ### Schritt 4: Code für Version 2 ändern
@@ -489,9 +489,9 @@ Invoke-RestMethod https://$APP_NAME-staging.azurewebsites.net/health
 
 Öffne beide URLs auch im Browser:
 
-- **Production** (`<app>.azurewebsites.net`): Grüner Hintergrund, Titel "Hello
+- **Production** (`<app>.azurewebsites.net`): Blauer Hintergrund, Titel "Hello
   from Azure Pipelines!", `version: 1.0.0`, `slot: production`.
-- **Staging** (`<app>-staging.azurewebsites.net`): Gelber Hintergrund, Titel
+- **Staging** (`<app>-staging.azurewebsites.net`): Grüner Hintergrund, Titel
   "Hello from Azure Pipelines v2!", `version: 1.0.XX`, `slot: staging`.
 
 Du siehst zwei verschiedene Versionen gleichzeitig — die alte und die neue. Die
@@ -531,8 +531,8 @@ Erwartete Ergebnisse:
 - **Staging**: `version: 1.0.0`, `slot: staging` — die alte Version ist im
   Staging-Slot gelandet, bereit für einen sofortigen Rollback.
 
-Im Browser siehst du: Production hat weiterhin einen **grünen** Hintergrund und
-Staging einen **gelben** — obwohl der Code getauscht wurde. Die Farbe folgt dem
+Im Browser siehst du: Production hat weiterhin einen **blauen** Hintergrund und
+Staging einen **grünen** — obwohl der Code getauscht wurde. Die Farbe folgt dem
 Slot, nicht dem Code, weil `SLOT_NAME` slot-sticky ist.
 
 ### Schritt 9: Rollback testen (optional)
