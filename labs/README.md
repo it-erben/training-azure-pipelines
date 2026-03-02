@@ -43,6 +43,7 @@
 | [Lab 11](lab-11-deployment-jobs/) | Deployment Jobs und Environments | Intermediate | 30 Min |
 | [Lab 12](lab-12-approval-gates/) | Approval Gates und Checks | Intermediate | 25 Min |
 | [Lab 13](lab-13-app-service-deploy/) | Deployment nach Azure App Service | Intermediate | 35 Min |
+| [Lab 13b](lab-13b-container-instances/) | Docker-Container auf Azure Container Instances deployen | Intermediate | 25 Min |
 
 ## Modul 07: Advanced Deployments
 
