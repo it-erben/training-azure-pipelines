@@ -128,8 +128,8 @@ mkdir -p terraform
 ```
 
 Erstelle die Datei **terraform/main.tf** — die Hauptkonfiguration mit
-Provider, Backend und den drei Ressourcen (Resource Group, App Service Plan,
-Web App):
+Provider, Backend, einer Data Source für die bestehende Resource Group und
+zwei Ressourcen (App Service Plan, Web App):
 
 ```hcl
 terraform {
@@ -151,10 +151,18 @@ provider "azurerm" {
   features {}
 }
 
-# Resource Group
-resource "azurerm_resource_group" "app" {
-  name     = "rg-${var.project_name}-${var.environment}"
-  location = var.location
+# Bestehende Resource Group referenzieren (wird vom Trainer bereitgestellt)
+data "azurerm_resource_group" "app" {
+  name = "rg-pipeline-training"
+}
+
+# App Service Plan
+resource "azurerm_service_plan" "app" {
+  name                = "plan-${var.project_name}-${var.environment}"
+  resource_group_name = data.azurerm_resource_group.app.name
+  location            = var.location
+  os_type             = "Linux"
+  sku_name            = "F1"
 
   tags = {
     Environment = var.environment
@@ -163,25 +171,16 @@ resource "azurerm_resource_group" "app" {
   }
 }
 
-# App Service Plan
-resource "azurerm_service_plan" "app" {
-  name                = "plan-${var.project_name}-${var.environment}"
-  resource_group_name = azurerm_resource_group.app.name
-  location            = azurerm_resource_group.app.location
-  os_type             = "Linux"
-  sku_name            = "F1"
-
-  tags = azurerm_resource_group.app.tags
-}
-
 # Web App
 resource "azurerm_linux_web_app" "app" {
   name                = "${var.project_name}-${var.environment}-${var.unique_suffix}"
-  resource_group_name = azurerm_resource_group.app.name
-  location            = azurerm_resource_group.app.location
+  resource_group_name = data.azurerm_resource_group.app.name
+  location            = var.location
   service_plan_id     = azurerm_service_plan.app.id
 
   site_config {
+    always_on = false  # Pflicht bei Free-Tier (F1)
+
     application_stack {
       node_version = "20-lts"
     }
@@ -192,7 +191,11 @@ resource "azurerm_linux_web_app" "app" {
     "APP_VERSION" = var.app_version
   }
 
-  tags = azurerm_resource_group.app.tags
+  tags = {
+    Environment = var.environment
+    Project     = var.project_name
+    ManagedBy   = "terraform"
+  }
 }
 ```
 
@@ -205,13 +208,13 @@ Gehe die Datei Abschnitt für Abschnitt durch:
   `terraform init` übergeben, damit sie nicht im Code stehen.
 - **`provider "azurerm"`**: Konfiguriert den Azure-Provider. `features {}` ist
   ein Pflichtblock, auch wenn keine speziellen Features konfiguriert werden.
-- **Resource Group**: Erstellt eine neue Resource Group mit einem Namen, der
-  aus Projektname und Umgebung zusammengesetzt ist (z. B.
-  `rg-training-app-dev`). Die Tags (`ManagedBy = "terraform"`) helfen dabei,
-  Terraform-verwaltete Ressourcen von manuell erstellten zu unterscheiden.
+- **Data Source `azurerm_resource_group`**: Statt eine neue Resource Group zu
+  erstellen, wird die vom Trainer bereitgestellte `rg-pipeline-training`
+  referenziert. Ein `data`-Block liest eine bestehende Ressource — Terraform
+  verwaltet sie nicht, sondern nutzt sie als Referenz für abhängige Ressourcen.
 - **App Service Plan**: Erstellt einen Linux-basierten Plan mit Free Tier
-  (`F1`). Beachte die Referenzen auf andere Ressourcen:
-  `azurerm_resource_group.app.name` verweist auf die oben definierte Resource
+  (`F1`). Beachte die Referenz auf die Data Source:
+  `data.azurerm_resource_group.app.name` verweist auf die bestehende Resource
   Group. Terraform erkennt diese Abhängigkeiten automatisch und erstellt die
   Ressourcen in der richtigen Reihenfolge.
 - **Web App**: Erstellt eine Linux-Web-App mit Node.js 20 und setzt
@@ -261,7 +264,7 @@ einem `terraform apply` angezeigt werden:
 
 ```hcl
 output "resource_group_name" {
-  value = azurerm_resource_group.app.name
+  value = data.azurerm_resource_group.app.name
 }
 
 output "web_app_name" {
@@ -395,6 +398,12 @@ stages:
                   inputs:
                     terraformVersion: 'latest'
 
+                # Execute-Bit auf Provider-Binaries wiederherstellen
+                # (Pipeline Artifacts bewahren keine Unix-Permissions)
+                - script: |
+                    chmod -R +x $(Pipeline.Workspace)/terraform-plan/.terraform/providers/
+                  displayName: 'Provider-Berechtigungen setzen'
+
                 # Terraform Init (muss erneut ausgeführt werden)
                 - task: TerraformTaskV4@4
                   displayName: 'Terraform Init'
@@ -436,14 +445,15 @@ stages:
               inlineScript: |
                 echo "=== Erstellte Ressourcen ==="
                 az resource list \
-                  --resource-group "rg-training-app-dev" \
+                  --resource-group "rg-pipeline-training" \
+                  --query "[?tags.ManagedBy=='terraform']" \
                   --output table
 
                 echo ""
                 echo "=== Web App Status ==="
                 az webapp show \
                   --name "training-app-dev-$(uniqueSuffix)" \
-                  --resource-group "rg-training-app-dev" \
+                  --resource-group "rg-pipeline-training" \
                   --query "{name:name, state:state, url:defaultHostName}" \
                   --output table
 ```
@@ -470,10 +480,13 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
     - Anschließend wird das gesamte `terraform/`-Verzeichnis (inklusive Plan-
       Datei) als Artefakt publiziert.
 - **Apply-Stage**: Ein Deployment Job, der das Artefakt aus der Plan-Stage
-  herunterlädt. Beachte, dass `terraform init` **erneut** ausgeführt werden
-  muss, da die Apply-Stage auf einem **anderen Agent** läuft als die
-  Plan-Stage — der `.terraform/`-Ordner (mit Provider-Plugins) existiert dort
-  nicht. `terraform apply tfplan` wendet exakt den gespeicherten Plan an — ohne
+  herunterlädt. Da Pipeline Artifacts keine Unix Execute-Permissions bewahren,
+  wird zuerst `chmod -R +x` auf das Provider-Verzeichnis ausgeführt — ohne
+  diesen Schritt schlägt `terraform apply` mit "permission denied" auf dem
+  Provider-Binary fehl. Danach wird `terraform init` **erneut** ausgeführt,
+  da die Apply-Stage auf einem **anderen Agent** läuft als die Plan-Stage
+  und das Backend neu verbunden werden muss.
+  `terraform apply tfplan` wendet exakt den gespeicherten Plan an — ohne
   erneute Berechnung. Da die Stage einen Deployment Job mit
   `environment: 'dev'` verwendet, kann man hier ein Approval Gate
   konfigurieren (Lab 12), damit jemand den Plan prüft, bevor Apply läuft.
@@ -498,33 +511,9 @@ Die Extension stellt die Tasks `TerraformInstaller@1` und
 `TerraformTaskV4@4` bereit. Ohne diese Extension schlägt die Pipeline mit
 der Fehlermeldung "TerraformTaskV4 not found" fehl.
 
-### Schritt 5: Platzhalter ersetzen, committen und beobachten
+### Schritt 5: Committen und beobachten
 
-Ersetze die Platzhalter in der Pipeline-Datei und in der `dev.tfvars`-Datei.
-Ersetze auch `REPLACE_ME` in der `dev.tfvars` mit deinem Kürzel:
-
-**Bash:**
-
-```bash
-# Platzhalter in der Pipeline ersetzen
-sed -i "s/<dein-storage-account>/$STORAGE_NAME/g" azure-pipelines.yml
-sed -i "s/<dein-kürzel>/$(whoami | head -c 3)/g" azure-pipelines.yml
-
-# Platzhalter in dev.tfvars ersetzen
-sed -i "s/REPLACE_ME/$(whoami | head -c 3)/g" terraform/dev.tfvars
-```
-
-**PowerShell:**
-
-```powershell
-# Platzhalter in der Pipeline ersetzen
-$SUFFIX = ($env:USERNAME).Substring(0,3)
-(Get-Content azure-pipelines.yml) -replace '<dein-storage-account>',$STORAGE_NAME | Set-Content azure-pipelines.yml
-(Get-Content azure-pipelines.yml) -replace '<dein-kürzel>',$SUFFIX | Set-Content azure-pipelines.yml
-
-# Platzhalter in dev.tfvars ersetzen
-(Get-Content terraform/dev.tfvars) -replace 'REPLACE_ME',$SUFFIX | Set-Content terraform/dev.tfvars
-```
+Committe und pushe nun alle Änderungen:
 
 ```bash
 git add terraform/main.tf terraform/variables.tf terraform/outputs.tf terraform/dev.tfvars azure-pipelines.yml
@@ -535,8 +524,8 @@ git push origin master
 Beobachte den Pipeline-Run im Browser:
 
 - Die **Plan-Stage** zeigt im Log des `terraform plan`-Steps die geplanten
-  Änderungen: "3 to add, 0 to change, 0 to destroy" (Resource Group, App
-  Service Plan, Web App).
+  Änderungen: "2 to add, 0 to change, 0 to destroy" (App Service Plan,
+  Web App).
 - Die **Apply-Stage** führt die Änderungen durch und zeigt die Outputs
   (Resource-Group-Name, Web-App-Name, URL).
 - Die **Verify-Stage** listet die erstellten Ressourcen und zeigt den Status
@@ -555,8 +544,8 @@ az storage blob list \
   --container-name tfstate \
   --output table
 
-# Erstellte Ressourcen in der neuen Resource Group prüfen
-az resource list --resource-group rg-training-app-dev --output table
+# Erstellte Ressourcen in der Resource Group prüfen
+az resource list --resource-group rg-pipeline-training --query "[?tags.ManagedBy=='terraform']" --output table
 ```
 
 **PowerShell:**
@@ -568,25 +557,25 @@ az storage blob list `
   --container-name tfstate `
   --output table
 
-# Erstellte Ressourcen in der neuen Resource Group prüfen
-az resource list --resource-group rg-training-app-dev --output table
+# Erstellte Ressourcen in der Resource Group prüfen
+az resource list --resource-group rg-pipeline-training --query "[?tags.ManagedBy=='terraform']" --output table
 ```
 
 Öffne im Browser das Build-Log und prüfe:
 
-- Die **Plan-Stage** zeigt `Plan: 3 to add, 0 to change, 0 to destroy.`
-- Die **Apply-Stage** zeigt `Apply complete! Resources: 3 added, 0 changed, 0 destroyed.`
-- Die **Verify-Stage** listet drei Ressourcen in der Resource Group.
+- Die **Plan-Stage** zeigt `Plan: 2 to add, 0 to change, 0 to destroy.`
+- Die **Apply-Stage** zeigt `Apply complete! Resources: 2 added, 0 changed, 0 destroyed.`
+- Die **Verify-Stage** listet die von Terraform erstellten Ressourcen.
 
 ## Erwartetes Ergebnis
 
 **Terraform Plan Output:**
 
 ```
-Plan: 3 to add, 0 to change, 0 to destroy.
+Plan: 2 to add, 0 to change, 0 to destroy.
 
 Changes to Outputs:
-  + resource_group_name = "rg-training-app-dev"
+  + resource_group_name = "rg-pipeline-training"
   + web_app_name        = "training-app-dev-mmu"
   + web_app_url         = "https://training-app-dev-mmu.azurewebsites.net"
 ```
@@ -594,21 +583,21 @@ Changes to Outputs:
 **Terraform Apply Output:**
 
 ```
-Apply complete! Resources: 3 added, 0 changed, 0 destroyed.
+Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
 
 Outputs:
-resource_group_name = "rg-training-app-dev"
+resource_group_name = "rg-pipeline-training"
 web_app_name = "training-app-dev-mmu"
 web_app_url = "https://training-app-dev-mmu.azurewebsites.net"
 ```
 
 ## Aufräumen
 
-Die von Terraform erstellten Ressourcen (Resource Group, App Service Plan, Web
-App) und der Storage Account für den State sollten nach dem Lab gelöscht
-werden. Verwende `terraform destroy`, um die Ressourcen sauber über Terraform
-zu entfernen (statt sie manuell im Portal zu löschen — sonst gerät der State
-aus dem Takt):
+Die von Terraform erstellten Ressourcen (App Service Plan, Web App) und der
+Storage Account für den State sollten nach dem Lab gelöscht werden. Verwende
+`terraform destroy`, um die Ressourcen sauber über Terraform zu entfernen
+(statt sie manuell im Portal zu löschen — sonst gerät der State aus dem
+Takt):
 
 **Bash:**
 
@@ -644,7 +633,7 @@ terraform destroy -var-file=dev.tfvars -var="unique_suffix=$($env:USERNAME.Subst
 az storage account delete --name $STORAGE_NAME --resource-group rg-pipeline-training --yes
 ```
 
-Prüfe im Azure Portal, dass die Resource Group `rg-training-app-dev` und der
+Prüfe im Azure Portal, dass der App Service Plan, die Web App und der
 Storage Account gelöscht wurden.
 
 ## Tipps und Troubleshooting
