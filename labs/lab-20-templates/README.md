@@ -71,7 +71,7 @@ az repos create --name "pipeline-templates" --output table
 ```bash
 # Klonen
 cd ~
-git clone https://dev.azure.com/<organisations-name>/pipeline-labs/_git/pipeline-templates
+git clone https://dev.azure.com/<organisations-name>/<dein-projektname>/_git/pipeline-templates
 cd pipeline-templates
 ```
 
@@ -80,7 +80,7 @@ cd pipeline-templates
 ```powershell
 # Klonen
 Set-Location $HOME
-git clone https://dev.azure.com/<organisations-name>/pipeline-labs/_git/pipeline-templates
+git clone https://dev.azure.com/<organisations-name>/<dein-projektname>/_git/pipeline-templates
 Set-Location pipeline-templates
 ```
 
@@ -429,7 +429,7 @@ resources:
   repositories:
     - repository: templates
       type: git
-      name: pipeline-labs/pipeline-templates
+      name: <dein-projektname>/pipeline-templates
       ref: refs/heads/master
 
 # Gemeinsame Variablen aus Template

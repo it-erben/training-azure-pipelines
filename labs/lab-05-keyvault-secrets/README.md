@@ -118,8 +118,6 @@ az devops service-endpoint azurerm create \
   --azure-rm-subscription-name "GFU-2026-01" \
   --azure-rm-tenant-id "$SP_TENANT" \
   --output table
-
-unset AZURE_DEVOPS_EXT_AZURE_RM_SERVICE_PRINCIPAL_KEY
 ```
 
 **PowerShell:**
@@ -136,8 +134,6 @@ az devops service-endpoint azurerm create `
   --azure-rm-subscription-name "GFU-2026-01" `
   --azure-rm-tenant-id "$SP_TENANT" `
   --output table
-
-Remove-Item env:AZURE_DEVOPS_EXT_AZURE_RM_SERVICE_PRINCIPAL_KEY
 ```
 
 Gib die Service Connection für alle Pipelines frei:
