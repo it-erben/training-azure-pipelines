@@ -143,6 +143,7 @@ Um die Pipeline zu triggern, machen wir eine kleine Änderung am Code. Öffne
 `// Approval flow test`). Committe und pushe die Änderung:
 
 ```bash
+echo "// Approval flow test" >> src/app.js
 git add src/app.js
 git commit -m "Trigger approval flow"
 git push origin master

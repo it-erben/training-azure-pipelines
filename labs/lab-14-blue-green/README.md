@@ -5,18 +5,18 @@
 In Lab 13 haben wir eine Anwendung direkt auf den App Service deployt. Das
 funktioniert, hat aber einen Nachteil: Während des Deployments kann es zu kurzen
 Ausfallzeiten kommen, und wenn die neue Version fehlerhaft ist, muss man ein
-erneutes Deployment der alten Version durchführen — was Zeit kostet und während
+erneutes Deployment der alten Version durchführen - was Zeit kostet und während
 der Fehlerbehebung die Anwendung in einem defekten Zustand belässt.
 
 **Blue/Green Deployment** löst dieses Problem: Die neue Version (Green) wird
 **neben** der aktuellen Version (Blue) deployt, ohne den laufenden Betrieb zu
 beeinträchtigen. Erst nach erfolgreichen Tests wird der Traffic von Blue auf
-Green umgeleitet. Bei Problemen kann sofort zurück auf Blue geschaltet werden —
+Green umgeleitet. Bei Problemen kann sofort zurück auf Blue geschaltet werden -
 ohne erneutes Deployment, ohne Ausfallzeit.
 
 Azure App Service bietet **Deployment Slots** als Mechanismus für Blue/Green
 Deployments. Ein Deployment Slot ist eine eigenständige Instanz der Anwendung
-mit eigener URL, eigenen Umgebungsvariablen und eigener Konfiguration — aber sie
+mit eigener URL, eigenen Umgebungsvariablen und eigener Konfiguration - aber sie
 teilt sich den App Service Plan (also die Compute-Ressourcen) mit dem
 Haupt-Slot. Der Ablauf ist:
 
@@ -24,9 +24,8 @@ Haupt-Slot. Der Ablauf ist:
 2. Die neue Version wird in den **Staging-Slot** deployt (Green).
 3. Tests laufen gegen die Staging-URL (`<app>-staging.azurewebsites.net`).
 4. Die Slots werden **getauscht (Swap)**: Der Traffic geht jetzt auf die neue
-   Version. Der Swap ist ein DNS/Routing-Wechsel, kein erneutes Deployment — er
-   dauert nur wenige Sekunden.
-5. Bei Problemen nach dem Swap: erneut swappen — die alte Version ist noch im
+   Version. Der Swap ist ein DNS/Routing-Wechsel, kein erneutes Deployment.
+5. Bei Problemen nach dem Swap: erneut swappen - die alte Version ist noch im
    Staging-Slot und sofort wieder live.
 
 Ein wichtiger Aspekt beim Swap: Azure App Service "wärmt" die neue Instanz
@@ -41,7 +40,7 @@ Slot selbst beschreiben (z. B. `SLOT_NAME`), wäre das verwirrend: Nach dem Swap
 würde Production den Wert `staging` anzeigen, obwohl es der Production-Slot ist.
 
 Azure bietet dafür **Slot-Sticky Settings** (auch "Deployment Slot Settings"
-genannt). Diese Settings bleiben beim Swap an ihrem Slot haften — sie wandern
+genannt). Diese Settings bleiben beim Swap an ihrem Slot haften - sie wandern
 nicht mit dem Code. Wir nutzen das für `SLOT_NAME`, damit jeder Slot immer
 seinen korrekten Namen anzeigt, unabhängig davon, welche Code-Version gerade
 dort läuft.
@@ -54,7 +53,7 @@ wird am Ende des Trainings automatisch per Terraform aufgeräumt.
 
 - Die Service Connection `azure-training-connection` aus Lab 05.
 - Die Environments `staging` und `production` aus Lab 11.
-- Deine Web App aus Lab 13 (`app-training-teilnehmerNN`) — diese läuft
+- Deine Web App aus Lab 13 (`app-training-teilnehmerNN`) - diese läuft
   bereits auf einem S1-Plan und unterstützt Deployment Slots.
 
 ## Aufgabenstellung
@@ -65,6 +64,9 @@ Deine Web App (`app-training-teilnehmerNN`) läuft bereits auf einem S1-Plan,
 der Deployment Slots unterstützt. In diesem Schritt erstellst du den
 Staging-Slot und konfigurierst Slot-Sticky Settings.
 
+
+Falls noch nicht geschehen in der letzten Übungsaufgabe, setze
+den APP_NAME als Variable:
 **Bash:**
 
 ```bash
@@ -78,6 +80,8 @@ APP_NAME="app-training-teilnehmerNN"
 # Setze deinen App-Namen (ersetze NN mit deiner Teilnehmernummer)
 $APP_NAME = "app-training-teilnehmerNN"
 ```
+
+Erzeuge danach einen Staging-Slot für das Deployment.
 
 **Bash:**
 
@@ -132,17 +136,17 @@ echo "Staging URL:    https://$APP_NAME-staging.azurewebsites.net"
 ```
 
 Hier wird nur der **Staging-Slot** explizit erstellt. Der **Production-Slot**
-ist die Web App selbst — er existiert automatisch seit `az webapp create` in
+ist die Web App selbst - er existiert automatisch seit `az webapp create` in
 Lab 13. Befehle ohne `--slot` wirken immer auf diesen Production-Slot.
 
 Nach der Erstellung hast du zwei erreichbare URLs: Die **Production-URL**
 (`<app>.azurewebsites.net`) und die **Staging-URL**
-(`<app>-staging.azurewebsites.net`). Beide sind unabhängige Instanzen — ein
+(`<app>-staging.azurewebsites.net`). Beide sind unabhängige Instanzen - ein
 Deployment in den Staging-Slot hat keine Auswirkung auf die Production-URL.
 
 Das `--slot-settings`-Flag setzt den Wert **und** markiert `SLOT_NAME` als
 **Deployment Slot Setting** (slot-sticky). Beim Swap bleibt dieses Setting an
-seinem Slot — es wandert nicht mit dem Code mit. Der Production-Slot zeigt
+seinem Slot - es wandert nicht mit dem Code mit. Der Production-Slot zeigt
 also immer `production` und der Staging-Slot immer `staging`, unabhängig
 davon, welcher Code dort läuft.
 
@@ -150,7 +154,7 @@ davon, welcher Code dort läuft.
 
 Um den Blue/Green-Wechsel visuell nachvollziehen zu können, erstellen wir einen
 Server mit Versionsanzeige und farblicher Unterscheidung der Slots. Diese erste
-Version wird unsere "Blue"-Version — die stabile Version in Production.
+Version wird unsere "Blue"-Version - die stabile Version in Production.
 
 Erstelle die Datei **src/server.js**:
 
@@ -213,7 +217,6 @@ Production. So haben wir eine laufende "Blue"-Version, gegen die wir später
 den Blue/Green-Wechsel demonstrieren können.
 
 ```bash
-cd ~/hello-pipeline
 az webapp up --name $APP_NAME --resource-group rg-pipeline-training --runtime "NODE:20-lts"
 ```
 
@@ -425,18 +428,18 @@ stages:
 
 Gehe die Pipeline Abschnitt für Abschnitt durch:
 
-- **Build-Stage**: Identisch zu Lab 13 — installiert Abhängigkeiten, packt alles
+- **Build-Stage**: Identisch zu Lab 13 - installiert Abhängigkeiten, packt alles
   in ein ZIP und publiziert es als Artefakt.
 - **DeployGreen-Stage**: Deployt die neue Version in den **Staging-Slot**
   (Green), nicht in den Haupt-Slot. Der entscheidende Unterschied zu Lab 13 sind
   die Parameter `deployToSlotOrASE: true` und `slotName: 'staging'` im
   `AzureWebApp@1`-Task. Anschließend setzt ein `AzureCLI@2`-Task das
   App-Setting `APP_VERSION` für den Staging-Slot. Beachte, dass `SLOT_NAME`
-  **nicht** gesetzt wird — dieses Setting haben wir in Schritt 1 als slot-sticky
+  **nicht** gesetzt wird - dieses Setting haben wir in Schritt 1 als slot-sticky
   konfiguriert, es bleibt automatisch am Slot haften.
 - **TestGreen-Stage**: Führt Smoke Tests gegen die **Staging-URL** aus
   (`<app>-staging.azurewebsites.net`). Beachte, dass dieser Stage ein normaler
-  Job (kein Deployment Job) ist — er führt nur Tests aus, deployt nichts. Die
+  Job (kein Deployment Job) ist - er führt nur Tests aus, deployt nichts. Die
   Tests prüfen den Health-Endpoint und die Erreichbarkeit der Homepage. Nur wenn
   beide Tests bestehen, geht die Pipeline weiter.
 - **SwapSlots-Stage**: Der eigentliche Blue/Green-Switch. Ein Deployment Job,
@@ -464,37 +467,38 @@ auf **"Review"** > **"Approve"**, um den Swap freizugeben.
 ### Schritt 7: Beide Slots vergleichen
 
 Nachdem die Pipeline v2 in den Staging-Slot deployt hat (aber **vor** dem Swap),
-laufen zwei verschiedene Versionen nebeneinander — das ist der Kern von
-Blue/Green Deployment:
+laufen zwei verschiedene Versionen nebeneinander. Das ist der Sinn von
+Blue/Green-Deployments:
 
 **Bash:**
 
 ```bash
-# Production: v1 (Blue) — die alte, stabile Version
+# Production: v1 (Blue) - die alte, stabile Version
 curl https://$APP_NAME.azurewebsites.net/health
 
-# Staging: v2 (Green) — die neue Version
+# Staging: v2 (Green) - die neue Version
 curl https://$APP_NAME-staging.azurewebsites.net/health
 ```
 
 **PowerShell:**
 
 ```powershell
-# Production: v1 (Blue) — die alte, stabile Version
+# Production: v1 (Blue) - die alte, stabile Version
 Invoke-RestMethod https://$APP_NAME.azurewebsites.net/health
 
-# Staging: v2 (Green) — die neue Version
+# Staging: v2 (Green) - die neue Version
 Invoke-RestMethod https://$APP_NAME-staging.azurewebsites.net/health
 ```
 
-Öffne beide URLs auch im Browser:
+Öffne beide URLs auch im Browser, am besten in einer **privaten Sitzung**,
+damit kein Caching greift:
 
 - **Production** (`<app>.azurewebsites.net`): Blauer Hintergrund, Titel "Hello
   from Azure Pipelines!", `version: 1.0.0`, `slot: production`.
 - **Staging** (`<app>-staging.azurewebsites.net`): Grüner Hintergrund, Titel
   "Hello from Azure Pipelines v2!", `version: 1.0.XX`, `slot: staging`.
 
-Du siehst zwei verschiedene Versionen gleichzeitig — die alte und die neue. Die
+Du siehst zwei verschiedene Versionen gleichzeitig - die alte und die neue. Die
 Produktion ist zu keinem Zeitpunkt gestört. Erst wenn du den Swap freigibst,
 wechselt der Traffic.
 
@@ -509,7 +513,7 @@ ist: automatisch), tauschen die Slots. Prüfe danach beide URLs erneut:
 # Production: jetzt v2 (neue Version)
 curl https://$APP_NAME.azurewebsites.net/health
 
-# Staging: jetzt v1 (alte Version — bereit für Rollback)
+# Staging: jetzt v1 (alte Version - bereit für Rollback)
 curl https://$APP_NAME-staging.azurewebsites.net/health
 ```
 
@@ -519,26 +523,26 @@ curl https://$APP_NAME-staging.azurewebsites.net/health
 # Production: jetzt v2 (neue Version)
 Invoke-RestMethod https://$APP_NAME.azurewebsites.net/health
 
-# Staging: jetzt v1 (alte Version — bereit für Rollback)
+# Staging: jetzt v1 (alte Version - bereit für Rollback)
 Invoke-RestMethod https://$APP_NAME-staging.azurewebsites.net/health
 ```
 
 Erwartete Ergebnisse:
 
-- **Production**: `version: 1.0.XX`, `slot: production` — die neue Version
+- **Production**: `version: 1.0.XX`, `slot: production` - die neue Version
   läuft jetzt in Production, und `SLOT_NAME` zeigt korrekt `production` (nicht
   `staging`!), weil wir es als slot-sticky Setting konfiguriert haben.
-- **Staging**: `version: 1.0.0`, `slot: staging` — die alte Version ist im
+- **Staging**: `version: 1.0.0`, `slot: staging` - die alte Version ist im
   Staging-Slot gelandet, bereit für einen sofortigen Rollback.
 
 Im Browser siehst du: Production hat weiterhin einen **blauen** Hintergrund und
-Staging einen **grünen** — obwohl der Code getauscht wurde. Die Farbe folgt dem
+Staging einen **grünen** - obwohl der Code getauscht wurde. Die Farbe folgt dem
 Slot, nicht dem Code, weil `SLOT_NAME` slot-sticky ist.
 
-### Schritt 9: Rollback testen (optional)
+### Schritt 9: Rollback testen
 
 Ein großer Vorteil von Blue/Green Deployments: Der Rollback ist ein erneuter
-Swap — keine erneute Build/Deploy-Kette nötig. Teste das manuell:
+Swap. Es ist keine erneute Build/Deploy-Kette nötig. Teste das manuell:
 
 **Bash:**
 
@@ -567,9 +571,6 @@ az webapp deployment slot swap `
 # Prüfe, ob die alte Version wieder in Production ist
 Invoke-RestMethod https://$APP_NAME.azurewebsites.net/health
 ```
-
-Der Rollback dauert nur wenige Sekunden, da kein erneutes Deployment
-stattfindet — es wird lediglich der Traffic umgeleitet.
 
 ## Validierung
 
@@ -618,7 +619,7 @@ $ curl https://<app-name>-staging.azurewebsites.net/health
 ```
 
 Beachte: `slot` zeigt nach dem Swap korrekt `production` bzw. `staging`, weil
-`SLOT_NAME` als slot-sticky Setting konfiguriert ist — es bleibt am Slot, nicht
+`SLOT_NAME` als slot-sticky Setting konfiguriert ist - es bleibt am Slot, nicht
 am Code.
 
 Pipeline-Ablauf:
@@ -631,7 +632,7 @@ Pipeline-Ablauf:
 ## Aufräumen
 
 Die Web App und der App Service Plan werden zentral per Terraform verwaltet.
-**Lösche diese Ressourcen nicht manuell** — sie werden am Ende des Trainings
+**Lösche diese Ressourcen nicht manuell** - sie werden am Ende des Trainings
 automatisch aufgeräumt.
 
 Lösche nur den **Staging-Slot**, den du in diesem Lab manuell erstellt hast:

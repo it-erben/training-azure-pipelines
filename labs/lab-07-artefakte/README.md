@@ -85,7 +85,7 @@ Build eindeutig identifizierbar ist.
 
 Mache das Skript ausführbar:
 
-**Bash auf UNIX-Systemen (Linux, macOS):**
+**Auf UNIX-Systemen (Linux, macOS):**
 
 ```bash
 git checkout master
@@ -93,7 +93,7 @@ git add build.sh
 chmod +x build.sh
 ```
 
-**PowerShell:**
+**Auf Windows:**
 
 ```powershell
 git checkout master
@@ -138,13 +138,13 @@ Report automatisch erzeugen. Hier simulieren wir das Ergebnis, um den
 
 Mache auch dieses Skript ausführbar:
 
-**Bash auf UNIX-Systemen (Linux, macOS):**
+**Auf UNIX-Systemen (Linux, macOS):**
 
 ```bash
 chmod +x test/generate-report.sh
 ```
 
-**PowerShell:**
+**Auf Windows:**
 
 ```powershell
 git add test/generate-report.sh

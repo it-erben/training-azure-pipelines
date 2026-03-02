@@ -2,7 +2,7 @@
 
 ## Hintergrund
 
-In den bisherigen Labs haben wir Deployments nur simuliert — die Deploy-Stages
+In den bisherigen Labs haben wir Deployments nur simuliert - die Deploy-Stages
 gaben Meldungen wie "Deployment erfolgreich!" aus, ohne tatsächlich eine
 Anwendung irgendwo zu deployen. In diesem Lab führen wir erstmals ein **echtes
 Deployment** durch: Wir deployen unsere Node.js-Anwendung auf einen **Azure App
@@ -10,7 +10,7 @@ Service**.
 
 Azure App Service ist ein PaaS-Dienst (Platform as a Service) zum Hosten von
 Webanwendungen. Im Gegensatz zu einer VM oder einem Container musst du dich
-nicht um das Betriebssystem, Webserver-Konfiguration oder Patches kümmern — du
+nicht um das Betriebssystem, Webserver-Konfiguration oder Patches kümmern - du
 lieferst nur den Anwendungscode, und App Service kümmert sich um den Rest. Der
 Dienst unterstützt diverse Sprachen (Node.js, Python, .NET, Java, PHP) und
 bietet Features wie Auto-Scaling, Deployment Slots (für Blue/Green Deployments
@@ -78,7 +78,7 @@ haben. Für App Service brauchen wir einen HTTP-Server, der die Dateien
 ausliefert. App Service startet die Anwendung mit `npm start` und erwartet, dass
 sie auf dem Port lauscht, der über die Umgebungsvariable `PORT` definiert wird.
 
-Erstelle die Datei **src/server.js** — ein einfacher Node.js-HTTP-Server mit
+Erstelle die Datei **src/server.js** - ein einfacher Node.js-HTTP-Server mit
 einem Health-Endpoint:
 
 ```javascript
@@ -151,7 +151,7 @@ Engine-Anforderung hinzuzufügen:
 
 Das `start`-Skript ist entscheidend: App Service führt `npm start` aus, um die
 Anwendung zu starten. Das `engines`-Feld dokumentiert die benötigte
-Node.js-Version — App Service beachtet dieses Feld und gibt eine Warnung aus,
+Node.js-Version - App Service beachtet dieses Feld und gibt eine Warnung aus,
 falls die konfigurierte Runtime-Version nicht passt.
 
 Erstelle außerdem eine **web.config**-Datei für den Fall, dass die App auf einem
@@ -312,7 +312,7 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
 - **Health Check**: Nach dem Deployment wartet der `AzureCLI@2`-Task 30
   Sekunden (Cold-Start-Zeit) und prüft dann den `/health`-Endpoint. Falls der
   HTTP-Status 200 ist, gilt der Health Check als bestanden. Bei einem anderen
-  Status wird eine Warnung ausgegeben, aber die Pipeline nicht abgebrochen — der
+  Status wird eine Warnung ausgegeben, aber die Pipeline nicht abgebrochen - der
   App-Start kann bei Free-Tier-Apps manchmal länger dauern.
 
 ### Schritt 4: Pipeline konfigurieren und starten
@@ -333,6 +333,9 @@ Pipeline-Run im Browser und klicke gegebenenfalls auf **"Permit"**.
 
 Nach erfolgreichem Deployment sollte die App unter der Azure-URL erreichbar
 sein. Prüfe sowohl die Hauptseite als auch den Health-Endpoint:
+
+**Das Deployment kann jetzt einige Minuten dauern.
+Vorher funktionieren die Befehle nicht**
 
 **Bash:**
 
@@ -355,13 +358,11 @@ Invoke-RestMethod https://$APP_NAME.azurewebsites.net
 ```
 
 Öffne die URL `https://<dein-app-name>.azurewebsites.net` auch im Browser, um
-die Seite visuell zu prüfen. Falls die App beim ersten Aufruf langsam reagiert,
-ist das normal — der Free Tier fährt Instanzen nach Inaktivität herunter
-(Cold Start).
+die Seite visuell zu prüfen.
 
 ## Aufräumen
 
 Die Web App und der App Service Plan werden zentral per Terraform verwaltet.
-**Lösche diese Ressourcen nicht manuell** — sie werden für Lab 14 (Blue/Green
+**Lösche diese Ressourcen nicht manuell** - sie werden für Lab 14 (Blue/Green
 Deployment) weiterverwendet und am Ende des Trainings automatisch
 aufgeräumt.
