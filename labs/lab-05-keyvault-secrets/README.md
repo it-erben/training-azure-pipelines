@@ -83,6 +83,16 @@ der Key-Vault-Integration in Variable Groups jedoch nicht unterstützt.
 
 Setze zuerst die Zugangsdaten, die du vom Trainer erhalten hast:
 
+> [!IMPORTANT]
+> **Achte beim Einfügen der Werte auf Folgendes:**
+> - Kopiere die Werte **exakt** — ohne führende/nachgestellte Leerzeichen oder
+>   Zeilenumbrüche.
+> - Die Tenant-ID und App-ID sind GUIDs im Format
+>   `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` — keine URLs, keine Anführungszeichen
+>   innerhalb der Werte.
+> - Das Client Secret kann Sonderzeichen enthalten. Stelle sicher, dass du es
+>   vollständig kopierst.
+
 **Bash:**
 
 ```bash
@@ -170,6 +180,33 @@ az devops service-endpoint update `
 
 Du kannst die erstellte Service Connection im Browser unter **Project
 Settings > Service connections** sehen.
+
+**Prüfe die Service Connection**, bevor du weitermachst. Wenn dieser Schritt
+fehlschlägt, wird auch die Key-Vault-Verknüpfung in Schritt 3 nicht
+funktionieren:
+
+```bash
+# Service Connection testen — ein Fehler hier bedeutet falsche Zugangsdaten
+az devops service-endpoint list --output table
+```
+
+Prüfe, ob `azure-training-connection` in der Liste erscheint. Wenn ja, teste
+die Verbindung zu Azure:
+
+```bash
+# Mit dem Service Principal anmelden, um die Zugangsdaten zu verifizieren
+az login --service-principal \
+  --username "$SP_APP_ID" \
+  --password "$SP_PASSWORD" \
+  --tenant "$SP_TENANT" \
+  --output table
+
+# Danach wieder mit deinem eigenen Account anmelden
+az login
+```
+
+Wenn `az login --service-principal` fehlschlägt, sind die Zugangsdaten falsch.
+Siehe den Abschnitt [Troubleshooting](#troubleshooting) am Ende dieses Labs.
 
 ### Schritt 3: Variable Group mit Key Vault erstellen
 
@@ -331,3 +368,74 @@ az devops service-endpoint delete --id "$SC_ID" --yes
 $GROUP_ID = (az pipelines variable-group list --query "[?name=='keyvault-secrets'].id" -o tsv)
 az pipelines variable-group delete --group-id $GROUP_ID --yes
 ```
+
+## Troubleshooting
+
+### "The authority (including the tenant ID) must be in a well-formed URI format"
+
+Dieser Fehler tritt beim Auswählen des Key Vaults in der Variable Group auf und
+bedeutet, dass die **Tenant-ID** in der Service Connection kein gültiges Format
+hat. Azure DevOps baut intern die URL
+`https://login.microsoftonline.com/<tenant-id>` — wenn die Tenant-ID
+Leerzeichen, Zeilenumbrüche oder andere ungültige Zeichen enthält, schlägt das
+fehl.
+
+**Lösung:**
+
+1. Lösche die bestehende Service Connection:
+
+   ```bash
+   SC_ID=$(az devops service-endpoint list --output json | \
+     jq -r '.[] | select(.name == "azure-training-connection") | .id')
+   az devops service-endpoint delete --id "$SC_ID" --yes
+   ```
+
+2. Prüfe die Tenant-ID — sie muss eine reine GUID sein:
+
+   ```bash
+   # Korrekt:   SP_TENANT="a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+   # Falsch:    SP_TENANT=" a1b2c3d4-e5f6-7890-abcd-ef1234567890 "  (Leerzeichen)
+   # Falsch:    SP_TENANT="https://login.microsoftonline.com/a1b2..."  (URL statt GUID)
+
+   # Kontrollausgabe — darf keine Leerzeichen oder Sonderzeichen zeigen:
+   echo ">$SP_TENANT<"
+   ```
+
+3. Setze die Variable neu und erstelle die Service Connection erneut (Schritt 2).
+
+### "Failed to obtain the Json Web Token(JWT) using service principal client ID"
+
+Dieser Fehler tritt beim Auswählen des Key Vaults in der Variable Group auf und
+bedeutet, dass die **Authentifizierung des Service Principals fehlgeschlagen**
+ist. Azure DevOps konnte sich mit den hinterlegten Zugangsdaten nicht bei Azure
+anmelden.
+
+**Mögliche Ursachen:**
+
+- **App-ID (Client ID) ist falsch** — z.B. vertippt oder mit der Object-ID
+  verwechselt.
+- **Client Secret ist falsch** — z.B. nicht vollständig kopiert oder abgelaufen.
+- **App-ID und Client Secret gehören zu verschiedenen Service Principals.**
+
+**Lösung:**
+
+1. Teste die Zugangsdaten direkt:
+
+   ```bash
+   az login --service-principal \
+     --username "$SP_APP_ID" \
+     --password "$SP_PASSWORD" \
+     --tenant "$SP_TENANT"
+   ```
+
+   Wenn dieser Befehl fehlschlägt, sind die Zugangsdaten definitiv falsch.
+   Fordere die korrekten Werte beim Trainer an.
+
+2. Lösche die bestehende Service Connection und erstelle sie mit den korrekten
+   Werten neu (siehe Schritt 2).
+
+3. Melde dich danach wieder mit deinem eigenen Account an:
+
+   ```bash
+   az login
+   ```
