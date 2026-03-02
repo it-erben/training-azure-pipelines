@@ -218,7 +218,7 @@ stages:
               echo "Deployment nach Staging erfolgreich!"
             displayName: 'Staging Deployment (simuliert)'
 
-  # ===== Stage 4: Deploy Production (nur manuell) =====
+  # ===== Stage 4: Deploy Production =====
   - stage: DeployProduction
     displayName: 'Deploy to Production'
     dependsOn: DeployStaging
