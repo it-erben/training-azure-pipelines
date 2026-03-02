@@ -1,4 +1,4 @@
-<svg host="65bd71144e" xmlns="http://www.w3.org/2000/svg" style="background: transparent; background-color: transparent;" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="646px" height="491px" viewBox="-0.5 -0.5 646 491" content="&lt;mxfile&gt;&lt;diagram name=&quot;Variablen-Hierarchie&quot; id=&quot;vh1&quot;&gt;5Vlbc6s2EP41zJw+5AxI+JLH2Ll0OtPOmXqmfTwjYAE1GLlCxE5+fVcgYW6OncRJTls/2LCsVtJ+n/aCHbpc7+4k26S/iggyh7jRzqHXDiGXvovfWvBYC2bUCBLJo1rk7QUr/gRGaNVKHkHRUVRCZIpvusJQ5DmEqiNjUoptVy0WWXfWDUtgIFiFLBtK/+SRSmvpnMz28p+BJ6mZeTKn9YM1s7pmI0XKIrFtieiNQ5dSCFVfrXdLyLTrrFvqcbcHnjbrkpCrUwZk7BGkGfXAstLszyHTDMcvArxI9MUfTHIW4PaJeydFiW42Gmi6UWpGyb6EW8FCAldQKEAVdxWKDbQM8cOG7kABRxlxn7a8CFPI8fIb30DGcyRC7Uv1aPHBJeYR6D16OHib4pyrDQv10y0SEmWpWmfmccyzbCkyIfE+FzkqLQolxT1YoUPoNJxDEGtlkSvDR480mpYEleQeVJga22EpH+CWK8XzxIj+4klSrZNUO+3jZcEAqWDXEhn87kCsQclHVLGHyVDJHKWpud3ueTmxsrTFyZmRMXMUksbwni54YRjzDHvIcfZYoFDNEum1BLKmLrZIpNO4cw0xzzn6E6cv85p6VivEyGT1Hpql0auW5baK9lcZ4/fveEIvbgLQe/ofc8+bdsnnzYfs88l7so8eZ99K6Wj+dupVdl7AOyvRsHUoMv27FDX5KoyRbK5Mgi/oEtyza39+qk0YXWv0t1LTl+vwB3gMqjBq9oewxc6SOotlEjDZWmO9ALuo96brjM28YHISXbVGa2RcfT6BxoR2aUzdIY3J/D1p7B+n8S8iOAOJb/Lk5dn3I5i8xt9qi59E20noR5fex9FW4Gq50oRDEp2Hxb1KoAm8LRZ771UKVFX1SCFZxaMAJNZsWPoFagAk5NGVHot3QSbCe/QFim55ZsEb979FyLf3xiIZw7bJoAe9XIhShjCsahSTCahhrQxRp0EYYiIhY4o/dPuFNzt4pNb6IRzcxPzTHUwPOJic6GBDevera2LnyR43tr4JXkUzqyLiuAA1gKSZ8nSURmqSHwKlJsSdjpJ/ACX6Wceg0FnreyAFi46nzLrblMOE1s99wcE8g7FXdZMJy3iS43UIVS+BfQNGaB6y7Mo8WPMo0sNx9oI/VV0zvdYxfqMZV+19snAm19pWqURhIDyA6IvC2OnJYtJJFSNN42wkUUzOkChqAPPqoBxHEMuV/w5+x8/fa/Hz/Y8G8BB+bw9rg7B1WX3wScSKtCn5ztMj9AJYN9INqdqOj71I9IbY10tIO9uEdCD2SA+7ei1mUPsV3/N26Lxnp97xwM4rkt9GciGxpv2esUC/7z36WqjW18nxylf/uuPc8FIKhUALPdnF5bmK+S5qZEoGB3ysIaVnOODDIrP19reKvMMXrgaX7tk1rdZI99XuzfZOJvNeFeM9B+cA+DN4nY61TO6In/2X+xlv9+/169O1/2+E3vwD&lt;/diagram&gt;&lt;/mxfile&gt;">
+<svg host="65bd71144e" xmlns="http://www.w3.org/2000/svg" style="background: transparent; background-color: transparent;" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="646px" height="491px" viewBox="-0.5 -0.5 646 491" content="&lt;mxfile&gt;&lt;diagram name=&quot;Variablen-Hierarchie&quot; id=&quot;vh1&quot;&gt;5Vlbc6s2EP41zLQP6YDkWx5j59LpTDtn6pn28YwAGXQiI1eIOMmv7wokDAhiktg5J60fbFhWK2m//XZX2MOr7eOdJLv0dxFT7iE/fvTwtYfQFCP41oKnSjBDl5UgkSyuRMFBsGbP1Ah9Iy1YTPOWohKCK7ZrCyORZTRSLRmRUuzbahvB27PuSEIdwToi3JX+zWKVVtIFmh/kv1KWpGbm6QJXD7bE6pqN5CmJxb4hwjceXkkhVHW1fVxRrl1n3VKNux14Wq9L0kyNGcDJE5Vm1APhhdmfh2Ycxi9DuEj0xV9EMhLC9pF/J0UBbjYaYLpWqkfJroRZwVJSpmiuKKj460jsaMMQGzZ0RxVlIEP+857lUUozuPzCdpSzDAKh8qV6svjAErOY6j0GMHifwpzrHYn00z0EJMhSteXm8YZxvhJcSLjPRAZKy1xJcU+t0EN4Fi1ouNHKIlMmHgNUa9ogKCX3VEWpsR0V8oHeMqVYlhjRN5Yk5TpRudMuXhYMKhV9bIgMfndUbKmST6Binl6aULJUMrf7Q1xOrSxtxOTcyIihQlIbPoQLXJiIeSF60PHosUCBmg2ktwaQNXWxh0AaFzvXdMMyBv6E6YusCj2rFUFmsnoP9dLwVcNyU0X7q9jA95/A0IubkOo9/Y9jL5i1gy9YuNE3QeeMPjwYffmOZN2g0B5soTX7pxBVHJTuBtx9mYQ/wepget/+/FyZMLpOpPVadPXXSleV91Bg/DSvoMdZfPNHoVnGdJamwNYy25vtQ3RtvBX2lqskJLKxxmoB7UUNi9vwnpuDczIPwukoDmqNxshN+fkO3ES4zU3su9xEi3Nyc/J5uPmbCM/PzJsseX3n8xH03MJv6YFPwcVpNIkvg4/jooDVMqVZBMw4DTU7PVtdIhvUDM7VtJXnn56Wv0zJIZXQXUOTHioHSJrFV3os3IVcRPfgCxDdMm7B6/e/RWhi741F1Idt3esMejkXhYyo238qIhOq3FMNjVtHORcTSTlR7KF9snu3g3u64h/CwXUhG+9gPOBgNNLBJuj9X3xTEEZ73Nj6IliZ+6yK2GxyqhxI6inHo9TTPf4QKNUpbjxKkwGU8PeiQa5r3NdQChIfPyFW7wWkW/66lTIcrDOQe1W7mBDOkgyuI1qe+uCEBxmaRYRfmQdbFsd6OMyes+fy/Qa+1jl+pyOu3Pt06U2vta1CidxAOIDoq9LY+GIxbZWKnuP9vKdQTE9QKCoAs5IoxxGE5ua/g99x/r0Vv8nkowEcwu/9ac1JW5flB57EJE/rlu80B59mwnNSSzPruWF7utzXKUgG4c5BK0Ad7Kqlm0HNl7Ev28GLjp1ql46dNxS/nWRCQk/7lZNQv5k/+gKv0tfF8WqiPh2d67iUQgHQQk92cXmqZr6NGpohh+B9p2x8AoK7TWbjPX2Zed1X4waXNnfNUavn9NU8mx2cjBadLiZ4CU4H+BN4HfcdmfweP09e72e4PfwDU7Hr8C8WvvkX&lt;/diagram&gt;&lt;/mxfile&gt;">
     <defs/>
     <g>
         <g>
@@ -76,17 +76,21 @@
                         <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 278px; height: 1px; padding-top: 335px; margin-left: 226px;">
                             <div style="box-sizing: border-box; font-size: 0; text-align: center; color: #ffffff; ">
                                 <div style="display: inline-block; font-size: 12px; font-family: &quot;Helvetica&quot;; color: light-dark(#ffffff, #121212); line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
-                                    <b>
-                                        Stage Variables
-                                    </b>
-                                    <br/>
-                                    <i>
-                                        Stage-weit
-                                    </i>
-                                    <br/>
-                                    <font style="color: light-dark(rgb(0, 0, 0), rgb(237, 237, 237));">
-                                        Nur in einer Stage verfügbar
-                                    </font>
+                                    <span>
+                                        <font style="color: light-dark(rgb(0, 0, 0), rgb(237, 237, 237));">
+                                            <b style="">
+                                                Stage Variables
+                                            </b>
+                                            <br/>
+                                            <i style="">
+                                                Stage-weit
+                                            </i>
+                                            <br/>
+                                            <font style="color: light-dark(rgb(0, 0, 0), rgb(237, 237, 237));">
+                                                Nur in einer Stage verfügbar
+                                            </font>
+                                        </font>
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -108,17 +112,21 @@
                         <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 158px; height: 1px; padding-top: 455px; margin-left: 286px;">
                             <div style="box-sizing: border-box; font-size: 0; text-align: center; color: #ffffff; ">
                                 <div style="display: inline-block; font-size: 12px; font-family: &quot;Helvetica&quot;; color: light-dark(#ffffff, #121212); line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
-                                    <b>
-                                        Job Variables
-                                    </b>
-                                    <br/>
-                                    <i>
-                                        Engster Scope
-                                    </i>
-                                    <br/>
-                                    <font style="color: light-dark(rgb(0, 0, 0), rgb(237, 237, 237));">
-                                        Nur in einem Job
-                                    </font>
+                                    <span>
+                                        <font style="color: light-dark(rgb(0, 0, 0), rgb(237, 237, 237));">
+                                            <b style="">
+                                                Job Variables
+                                            </b>
+                                            <br/>
+                                            <i style="">
+                                                Engster Scope
+                                            </i>
+                                            <br/>
+                                            <font style="color: light-dark(rgb(0, 0, 0), rgb(237, 237, 237));">
+                                                Nur in einem Job
+                                            </font>
+                                        </font>
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -219,7 +227,7 @@
             <path d="M 35 110 L 35 429.76" fill="none" stroke="none" pointer-events="stroke"/>
             <path d="M 35 437.76 L 31 429.76 L 39 429.76 Z" fill="none" stroke="none" pointer-events="all"/>
             <path d="M 35 110 C 35.76 224.27 37.06 341.26 35 429.76 M 35 110 C 32.28 219.89 31.91 326.93 35 429.76" fill="none" stroke="#999999" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" stroke-miterlimit="10" stroke-dasharray="6 6" pointer-events="stroke" style="stroke: light-dark(rgb(153, 153, 153), rgb(106, 106, 106));"/>
-            <path d="M 30.98 429.78 C 30.98 429.78 30.98 429.78 30.98 429.78 M 30.98 429.78 C 30.98 429.78 30.98 429.78 30.98 429.78 M 35.05 437.3 C 34.98 436.09 37.05 436.11 37.67 434.28 M 35.05 437.3 C 35.82 436.1 37.06 435.2 37.67 434.28" fill="none" stroke="#999999" stroke-linejoin="round" stroke-linecap="round" stroke-miterlimit="10" pointer-events="all" style="stroke: light-dark(rgb(153, 153, 153), rgb(106, 106, 106));"/>
+            <path d="M 31.27 429.45 C 31.27 429.45 31.27 429.45 31.27 429.45 M 31.27 429.45 C 31.27 429.45 31.27 429.45 31.27 429.45 M 34.69 437.71 C 34.6 436.21 37.19 436.23 37.97 433.94 M 34.69 437.71 C 35.65 436.22 37.19 435.09 37.97 433.94" fill="none" stroke="#999999" stroke-linejoin="round" stroke-linecap="round" stroke-miterlimit="10" pointer-events="all" style="stroke: light-dark(rgb(153, 153, 153), rgb(106, 106, 106));"/>
             <path d="M 35 437.76 C 32.56 433.18 31.93 430.27 31 429.76 M 35 437.76 C 33.88 435.8 32.28 431.98 31 429.76 M 31 429.76 C 32.81 430.35 38 430.23 39 429.76 M 31 429.76 C 33.6 430.6 37.15 430.35 39 429.76 M 39 429.76 C 36.19 431.11 37.37 433.91 35 437.76 M 39 429.76 C 38.2 431.73 35.62 434.76 35 437.76" fill="none" stroke="#999999" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" stroke-miterlimit="10" pointer-events="all" style="stroke: light-dark(rgb(153, 153, 153), rgb(106, 106, 106));"/>
         </g>
         <g>
