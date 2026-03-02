@@ -67,6 +67,7 @@ az repos create --name "pipeline-templates" --output table
 ```
 
 **Bash:**
+
 ```bash
 # Klonen
 cd ~
@@ -75,6 +76,7 @@ cd pipeline-templates
 ```
 
 **PowerShell:**
+
 ```powershell
 # Klonen
 Set-Location $HOME
@@ -85,11 +87,13 @@ Set-Location pipeline-templates
 Erstelle die Verzeichnisstruktur für die verschiedenen Template-Typen:
 
 **Bash:**
+
 ```bash
 mkdir -p steps jobs stages variables
 ```
 
 **PowerShell:**
+
 ```powershell
 New-Item -ItemType Directory -Force -Path steps, jobs, stages, variables | Out-Null
 ```
@@ -392,7 +396,7 @@ variables:
 ```bash
 git add -A
 git commit -m "Add pipeline templates library"
-git push origin main
+git push origin master
 ```
 
 ### Schritt 7: Templates in der Anwendungs-Pipeline verwenden
@@ -402,11 +406,13 @@ aus dem Template-Repository ein. Die Verbindung zwischen den Repositories
 wird über `resources.repositories` hergestellt.
 
 **Bash:**
+
 ```bash
 cd ~/hello-pipeline
 ```
 
 **PowerShell:**
+
 ```powershell
 Set-Location $HOME/hello-pipeline
 ```
@@ -417,14 +423,14 @@ Ersetze den Inhalt von `azure-pipelines.yml`:
 trigger:
   branches:
     include:
-      - main
+      - master
 
 resources:
   repositories:
     - repository: templates
       type: git
       name: pipeline-labs/pipeline-templates
-      ref: refs/heads/main
+      ref: refs/heads/master
 
 # Gemeinsame Variablen aus Template
 variables:
@@ -482,8 +488,8 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
 - **`resources.repositories`**: Definiert das externe Repository mit dem
   Alias `templates`. `type: git` bedeutet, dass es ein Azure Repos
   Git-Repository im selben Projekt ist. `name` folgt dem Format
-  `<projekt>/<repository>`. `ref: refs/heads/main` pinnt die Templates auf
-  den `main`-Branch — in der Praxis würde man einen Tag verwenden
+  `<projekt>/<repository>`. `ref: refs/heads/master` pinnt die Templates auf
+  den `master`-Branch — in der Praxis würde man einen Tag verwenden
   (z. B. `ref: refs/tags/v1.0`), um stabile Versionen zu garantieren.
 - **`variables` mit Template**: Statt Variablen direkt in der Pipeline zu
   definieren, werden sie aus `variables/common.yml@templates` geladen. Das
@@ -502,7 +508,7 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
 ```bash
 git add azure-pipelines.yml
 git commit -m "Use pipeline templates from shared repository"
-git push origin main
+git push origin master
 ```
 
 Beobachte den Pipeline-Run im Browser. Die Steps, die aus Templates stammen,
@@ -579,7 +585,7 @@ az repos list --output table
   **zirkuläre Referenzen** — Template A bindet Template B ein, das wiederum
   Template A einbindet. Azure Pipelines erkennt das und meldet einen Fehler.
 - **Versionierung**: Verwende `ref: refs/tags/v1.0` statt
-  `ref: refs/heads/main` für stabile Template-Versionen. So kannst du
+  `ref: refs/heads/master` für stabile Template-Versionen. So kannst du
   Templates weiterentwickeln, ohne laufende Pipelines zu brechen. Pipelines
   aktualisieren auf eine neue Version durch Ändern des `ref`-Werts.
 - **Template-Debugging**: Bei Fehlern in Templates zeigt Azure DevOps die

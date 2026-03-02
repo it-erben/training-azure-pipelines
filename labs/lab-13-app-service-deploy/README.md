@@ -47,12 +47,14 @@ Der App-Name folgt dem Muster `app-training-teilnehmerNN` (z. B.
 `rg-pipeline-training`.
 
 **Bash:**
+
 ```bash
 # Setze deinen App-Namen (ersetze NN mit deiner Teilnehmernummer)
 APP_NAME="app-training-teilnehmerNN"
 ```
 
 **PowerShell:**
+
 ```powershell
 # Setze deinen App-Namen (ersetze NN mit deiner Teilnehmernummer)
 $APP_NAME = "app-training-teilnehmerNN"
@@ -204,7 +206,7 @@ Platzhalter `<dein-app-name>` mit deinem tatsächlichen App-Namen aus Schritt 1:
 trigger:
   branches:
     include:
-      - main
+      - master
 
 variables:
   azureSubscription: 'azure-training-connection'
@@ -320,7 +322,7 @@ Ersetze den Platzhalter in der Pipeline-Datei und committe alle Dateien:
 ```bash
 git add src/server.js package.json web.config azure-pipelines.yml
 git commit -m "Add App Service deployment pipeline"
-git push origin main
+git push origin master
 ```
 
 Beim ersten Lauf kann es sein, dass die Pipeline die Nutzung der Service
@@ -333,6 +335,7 @@ Nach erfolgreichem Deployment sollte die App unter der Azure-URL erreichbar
 sein. Prüfe sowohl die Hauptseite als auch den Health-Endpoint:
 
 **Bash:**
+
 ```bash
 # Health Endpoint prüfen
 curl https://$APP_NAME.azurewebsites.net/health
@@ -342,6 +345,7 @@ curl https://$APP_NAME.azurewebsites.net
 ```
 
 **PowerShell:**
+
 ```powershell
 # Health Endpoint prüfen
 Invoke-RestMethod https://$APP_NAME.azurewebsites.net/health

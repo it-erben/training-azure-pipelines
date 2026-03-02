@@ -54,7 +54,7 @@ Ersetze den Inhalt von `azure-pipelines.yml`:
 trigger:
   branches:
     include:
-      - main
+      - master
 
 parameters:
   - name: simulateFailure
@@ -237,7 +237,7 @@ Committe die Pipeline und lass sie einmal mit den Default-Parametern laufen
 ```bash
 git add azure-pipelines.yml
 git commit -m "Add rollback strategies"
-git push origin main
+git push origin master
 ```
 
 Warte, bis die Pipeline durchläuft. Die Deploy-Stage sollte erfolgreich sein,

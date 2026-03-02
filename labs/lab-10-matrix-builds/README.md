@@ -134,7 +134,7 @@ Ersetze den Inhalt von `azure-pipelines.yml`:
 trigger:
   branches:
     include:
-      - main
+      - master
 
 # ===== Variante 1: Matrix mit OS und Node-Versionen =====
 stages:
@@ -282,7 +282,7 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
 ```bash
 git add test/cross-platform-test.js azure-pipelines.yml
 git commit -m "Add matrix build strategy"
-git push origin main
+git push origin master
 ```
 
 ### Schritt 4: Matrix-Visualisierung im Browser

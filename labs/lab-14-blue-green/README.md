@@ -66,18 +66,21 @@ der Deployment Slots unterstützt. In diesem Schritt erstellst du den
 Staging-Slot und konfigurierst Slot-Sticky Settings.
 
 **Bash:**
+
 ```bash
 # Setze deinen App-Namen (ersetze NN mit deiner Teilnehmernummer)
 APP_NAME="app-training-teilnehmerNN"
 ```
 
 **PowerShell:**
+
 ```powershell
 # Setze deinen App-Namen (ersetze NN mit deiner Teilnehmernummer)
 $APP_NAME = "app-training-teilnehmerNN"
 ```
 
 **Bash:**
+
 ```bash
 # Staging Slot erstellen
 az webapp deployment slot create \
@@ -103,6 +106,7 @@ echo "Staging URL:    https://$APP_NAME-staging.azurewebsites.net"
 ```
 
 **PowerShell:**
+
 ```powershell
 # Staging Slot erstellen
 az webapp deployment slot create `
@@ -211,11 +215,13 @@ az webapp up --name $APP_NAME --resource-group rg-pipeline-training --runtime "N
 Prüfe, ob die App läuft:
 
 **Bash:**
+
 ```bash
 curl https://$APP_NAME.azurewebsites.net/health
 ```
 
 **PowerShell:**
+
 ```powershell
 Invoke-RestMethod https://$APP_NAME.azurewebsites.net/health
 ```
@@ -261,7 +267,7 @@ Platzhalter `<dein-app-name>` mit deinem tatsächlichen App-Namen:
 trigger:
   branches:
     include:
-      - main
+      - master
 
 variables:
   azureSubscription: 'azure-training-connection'
@@ -443,7 +449,7 @@ Committe und pushe alle Dateien:
 ```bash
 git add src/server.js azure-pipelines.yml
 git commit -m "Add blue/green deployment with slot swap"
-git push origin main
+git push origin master
 ```
 
 Falls auf dem Production-Environment ein Approval Gate konfiguriert ist
@@ -457,6 +463,7 @@ laufen zwei verschiedene Versionen nebeneinander — das ist der Kern von
 Blue/Green Deployment:
 
 **Bash:**
+
 ```bash
 # Production: v1 (Blue) — die alte, stabile Version
 curl https://$APP_NAME.azurewebsites.net/health
@@ -466,6 +473,7 @@ curl https://$APP_NAME-staging.azurewebsites.net/health
 ```
 
 **PowerShell:**
+
 ```powershell
 # Production: v1 (Blue) — die alte, stabile Version
 Invoke-RestMethod https://$APP_NAME.azurewebsites.net/health
@@ -491,6 +499,7 @@ Nachdem du den Swap freigegeben hast (oder falls kein Approval Gate konfiguriert
 ist: automatisch), tauschen die Slots. Prüfe danach beide URLs erneut:
 
 **Bash:**
+
 ```bash
 # Production: jetzt v2 (neue Version)
 curl https://$APP_NAME.azurewebsites.net/health
@@ -500,6 +509,7 @@ curl https://$APP_NAME-staging.azurewebsites.net/health
 ```
 
 **PowerShell:**
+
 ```powershell
 # Production: jetzt v2 (neue Version)
 Invoke-RestMethod https://$APP_NAME.azurewebsites.net/health
@@ -526,6 +536,7 @@ Ein großer Vorteil von Blue/Green Deployments: Der Rollback ist ein erneuter
 Swap — keine erneute Build/Deploy-Kette nötig. Teste das manuell:
 
 **Bash:**
+
 ```bash
 # Erneuter Swap: Production und Staging werden wieder getauscht
 az webapp deployment slot swap \
@@ -539,6 +550,7 @@ curl https://$APP_NAME.azurewebsites.net/health
 ```
 
 **PowerShell:**
+
 ```powershell
 # Erneuter Swap: Production und Staging werden wieder getauscht
 az webapp deployment slot swap `

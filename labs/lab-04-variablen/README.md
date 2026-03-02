@@ -45,6 +45,7 @@ ist besonders nützlich für umgebungsspezifische Einstellungen, die sich zwisch
 Deployments unterscheiden.
 
 **Bash:**
+
 ```bash
 # Erstelle eine Variable Group namens "common-settings" mit drei Variablen.
 # --authorize true gibt die Gruppe für alle Pipelines im Projekt frei.
@@ -61,6 +62,7 @@ az pipelines variable-group create \
 ```
 
 **PowerShell:**
+
 ```powershell
 # Erstelle eine Variable Group namens "common-settings" mit drei Variablen.
 # --authorize true gibt die Gruppe für alle Pipelines im Projekt frei.
@@ -92,7 +94,7 @@ Ersetze den Inhalt von `azure-pipelines.yml` in deinem Repository
 trigger:
   branches:
     include:
-      - main
+      - master
 
 # Parameter: Können beim manuellen Start gesetzt werden
 parameters:
@@ -119,7 +121,7 @@ variables:
   - name: appName
     value: 'hello-pipeline-app'
   - name: isMain
-    value: ${{ eq(variables['Build.SourceBranchName'], 'main') }}
+    value: ${{ eq(variables['Build.SourceBranchName'], 'master') }}
 
   # Variable Group einbinden
   - group: common-settings
@@ -198,7 +200,7 @@ verstehen:
   Pipeline erscheinen. `deployTarget` bietet eine Auswahl aus drei Umgebungen,
   `runTests` ist ein Boolean-Schalter.
 - **`variables`**: Enthält statische Inline-Variablen, einen Compile-Time-
-  Ausdruck (`${{ eq(...) }}`), der prüft, ob der Build auf `main` läuft, und
+  Ausdruck (`${{ eq(...) }}`), der prüft, ob der Build auf `master` läuft, und
   bindet die zuvor erstellte Variable Group ein. Wichtig: Sobald eine Variable
   Group (`- group:`) eingebunden wird, müssen **alle** Variablen in der
   Listen-Syntax (`- name: / value:`) statt der Kurzform (`key: value`)
@@ -216,12 +218,12 @@ verstehen:
 ### Schritt 3: Committen und pushen
 
 Committe die geänderte Pipeline-Datei und pushe sie. Da der CI-Trigger auf
-`main` konfiguriert ist, wird automatisch ein Build ausgelöst:
+`master` konfiguriert ist, wird automatisch ein Build ausgelöst:
 
 ```bash
 git add azure-pipelines.yml
 git commit -m "Add variables and parameters demo"
-git push origin main
+git push origin master
 ```
 
 Dieser automatisch ausgelöste Build verwendet die **Default-Werte** der
@@ -260,6 +262,7 @@ az pipelines list --output table
 ```
 
 **Bash:**
+
 ```bash
 # Pipeline mit Parametern starten (ersetze <pipeline-id> durch die
 # tatsächliche ID). Die Parameter werden als Key=Value-Paare übergeben.
@@ -268,6 +271,7 @@ az pipelines run --id <pipeline-id> \
 ```
 
 **PowerShell:**
+
 ```powershell
 # Pipeline mit Parametern starten (ersetze <pipeline-id> durch die
 # tatsächliche ID). Die Parameter werden als Key=Value-Paare übergeben.
@@ -293,6 +297,7 @@ az pipelines variable-group list --output table
 ```
 
 **Bash:**
+
 ```bash
 # Füge eine neue Variable zur Gruppe hinzu (ersetze <group-id> durch die
 # tatsächliche ID aus der vorherigen Ausgabe, z. B. 1).
@@ -310,6 +315,7 @@ az pipelines variable-group variable update \
 ```
 
 **PowerShell:**
+
 ```powershell
 # Füge eine neue Variable zur Gruppe hinzu (ersetze <group-id> durch die
 # tatsächliche ID aus der vorherigen Ausgabe, z. B. 1).

@@ -31,6 +31,7 @@ Zahlen enthalten (keine Bindestriche oder Unterstriche). Wir generieren einen
 eindeutigen Namen mit deinen Initialien:
 
 **Bash:**
+
 ```bash
 # Eindeutigen ACR-Namen generieren
 INITIALS="DEINE_INITIALEN"
@@ -39,6 +40,7 @@ echo "ACR Name: $ACR_NAME"
 ```
 
 **PowerShell:**
+
 ```powershell
 # Eindeutigen ACR-Namen generieren
 $INITIALS = "<DEINE_INITIALEN_KLEIN_GESCHRIEBEN>"
@@ -47,6 +49,7 @@ echo "ACR Name: $ACR_NAME"
 ```
 
 **Bash:**
+
 ```bash
 # ACR erstellen (Basic SKU: günstigste Option)
 az acr create \
@@ -59,6 +62,7 @@ az acr create \
 ```
 
 **PowerShell:**
+
 ```powershell
 # ACR erstellen (Basic SKU: günstigste Option)
 az acr create `
@@ -164,7 +168,7 @@ ACR-Namen (den du in Schritt 1 generiert hast):
 trigger:
   branches:
     include:
-      - main
+      - master
 
 variables:
   # Ersetze mit deinem ACR-Namen
@@ -267,7 +271,7 @@ Nachdem du den ACR-Namen gesetzt hast, kannst du committen und pushen:
 ```bash
 git add Dockerfile .dockerignore azure-pipelines.yml
 git commit -m "Add Docker build pipeline with ACR"
-git push origin main
+git push origin master
 ```
 
 Beim ersten Lauf der Pipeline mit der neuen Service Connection muss die Nutzung möglicherweise
@@ -281,6 +285,7 @@ Lade dir das neue Image aus ACR
 herunter und teste:
 
 **Bash:**
+
 ```bash
 # ACR-Credentials holen
 ACR_PASSWORD=$(az acr credential show --name $ACR_NAME --query "passwords[0].value" -o tsv)
@@ -303,6 +308,7 @@ docker stop hello-test && docker rm hello-test
 ```
 
 **PowerShell:**
+
 ```powershell
 # ACR-Credentials holen
 $ACR_PASSWORD = (az acr credential show --name $ACR_NAME --query "passwords[0].value" -o tsv)

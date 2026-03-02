@@ -6,7 +6,7 @@ In den bisherigen Labs wurden alle Deployments automatisch ausgeführt, sobald
 die vorherige Stage erfolgreich war. In produktionsnahen Szenarien ist das zu
 riskant: Ein fehlerhafter Build könnte direkt in Production landen, ohne dass
 jemand die Staging-Testergebnisse geprüft hat. Außerdem möchte man bestimmte
-Regeln erzwingen - z.B. dass nur der `main`-Branch nach Production deployt
+Regeln erzwingen - z.B. dass nur der `master`-Branch nach Production deployt
 werden darf oder dass Deployments nur während der Geschäftszeiten stattfinden.
 
 Azure DevOps löst das über **Approvals and Checks**, die auf Environments
@@ -20,7 +20,7 @@ ausgewertet. Die Pipeline pausiert, bis alle Checks bestanden sind:
   die Deployment-Stage weiter. Bei einer Ablehnung ("Reject")
   wird die Stage als fehlgeschlagen markiert.
 - **Branch Control**: Erlaubt Deployments nur von bestimmten Branches (z. B.
-  `refs/heads/main`). Wenn jemand versucht, von einem Feature-Branch nach
+  `refs/heads/master`). Wenn jemand versucht, von einem Feature-Branch nach
   Production zu deployen, blockiert dieser Check automatisch - ohne dass ein
   Mensch eingreifen muss.
 - **Business Hours**: Erlaubt Deployments nur während definierter Zeitfenster
@@ -79,14 +79,14 @@ schalten.
 
 ### Schritt 2: Branch Control Check hinzufügen
 
-Dieser Check stellt sicher, dass nur Deployments vom `main`-Branch nach
+Dieser Check stellt sicher, dass nur Deployments vom `master`-Branch nach
 Production gelangen. Selbst wenn jemand die `condition` in der Pipeline-YAML-
 Datei entfernt, blockiert dieser Check das Deployment von Feature-Branches.
 
 1. Du bist weiterhin unter **"Approvals and checks"** für das
    Production-Environment.
 2. Klicke auf **"+ Add new"** > **"Branch control"**.
-3. **Allowed branches**: Gib `refs/heads/main` ein. Du kannst hier auch
+3. **Allowed branches**: Gib `refs/heads/master` ein. Du kannst hier auch
    Wildcards verwenden (z. B. `refs/heads/release/*`), um mehrere Branches
    zuzulassen.
 4. **Verify branch protection**: Optional. Wenn aktiviert, prüft Azure DevOps
@@ -145,7 +145,7 @@ Um die Pipeline zu triggern, machen wir eine kleine Änderung am Code. Öffne
 ```bash
 git add src/app.js
 git commit -m "Trigger approval flow"
-git push origin main
+git push origin master
 ```
 
 ### Schritt 6: Approval erteilen
@@ -160,7 +160,7 @@ git push origin main
 3. Vor **Deploy Production** pausiert die Pipeline. Du siehst einen
    **"Review"**-Button oder die Meldung **"Waiting for approval"**. Azure DevOps
    prüft gleichzeitig den Branch-Control-Check (der automatisch bestanden wird,
-   da wir von `main` deployen) und den Exclusive-Lock-Check
+   da wir von `master` deployen) und den Exclusive-Lock-Check
    (der bestanden wird, da kein anderes Deployment läuft).
 4. Klicke auf **"Review"**. Es öffnet sich ein Dialog mit:
     - Den konfigurierten **Instructions** ("Bitte prüfe die

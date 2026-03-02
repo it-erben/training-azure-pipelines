@@ -66,11 +66,13 @@ sind).
 Erstelle das Verzeichnis und die Script-Datei:
 
 **Bash:**
+
 ```bash
 mkdir -p scripts
 ```
 
 **PowerShell:**
+
 ```powershell
 New-Item -ItemType Directory -Force -Path scripts | Out-Null
 ```
@@ -208,11 +210,13 @@ Gehe das Script Abschnitt für Abschnitt durch:
 Mache das Script ausführbar:
 
 **Bash:**
+
 ```bash
 chmod +x scripts/detect-drift.sh
 ```
 
 **PowerShell:**
+
 ```powershell
 git add scripts/detect-drift.sh
 git update-index --chmod=+x scripts/detect-drift.sh
@@ -238,7 +242,7 @@ schedules:
     displayName: 'Täglicher Drift Check (07:00 UTC)'
     branches:
       include:
-        - main
+        - master
     always: true  # Auch ohne Code-Änderungen ausführen
 
 variables:
@@ -389,7 +393,7 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
 ```bash
 git add scripts/detect-drift.sh azure-pipelines.yml
 git commit -m "Add infrastructure drift detection pipeline"
-git push origin main
+git push origin master
 ```
 
 Da `trigger: none` gesetzt ist, wird die Pipeline **nicht** automatisch
@@ -397,7 +401,7 @@ gestartet. Starte sie manuell:
 
 ```bash
 # Pipeline manuell starten
-az pipelines run --name "hello-pipeline" --branch main --output table
+az pipelines run --name "hello-pipeline" --branch master --output table
 ```
 
 Alternativ kannst du die Pipeline im Browser unter **Pipelines > hello-pipeline**

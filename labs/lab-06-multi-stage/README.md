@@ -26,7 +26,7 @@ Zusätzlich lernen wir in diesem Lab zwei wichtige Konzepte kennen:
   Dateien als Artefakt, und mit `download` lädst du sie in einer späteren Stage
   wieder herunter.
 - **Conditions**: Mit `condition` kannst du steuern, ob eine Stage überhaupt
-  ausgeführt wird - z. B. nur auf dem `main`-Branch oder nur wenn alle
+  ausgeführt wird - z. B. nur auf dem `master`-Branch oder nur wenn alle
   vorherigen Stages erfolgreich waren.
 
 ## Aufgabenstellung
@@ -60,11 +60,13 @@ Pipeline später aufruft (`npm run build`, `npm test`, `npm run lint`):
 Erstelle die Verzeichnisse und die Anwendungsdatei:
 
 **Bash:**
+
 ```bash
 mkdir -p src test
 ```
 
 **PowerShell:**
+
 ```powershell
 New-Item -ItemType Directory -Force -Path src, test | Out-Null
 ```
@@ -122,9 +124,9 @@ abbilden:
 1. **Build**: Baut die Anwendung und publiziert die Artefakte.
 2. **Test**: Führt Unit Tests und Lint-Check parallel in zwei Jobs aus.
 3. **Deploy Staging**: Simuliert ein Deployment in die Staging-Umgebung (nur auf
-   `main`).
+   `master`).
 4. **Deploy Production**: Simuliert ein Deployment in die Produktion (nur auf
-   `main`, nach erfolgreichem Staging-Deployment).
+   `master`, nach erfolgreichem Staging-Deployment).
 
 Ersetze den Inhalt von `azure-pipelines.yml`:
 
@@ -132,7 +134,7 @@ Ersetze den Inhalt von `azure-pipelines.yml`:
 trigger:
   branches:
     include:
-      - main
+      - master
 
 variables:
   nodeVersion: '20.x'
@@ -192,11 +194,11 @@ stages:
           - script: npm run lint
             displayName: 'Lint ausführen'
 
-  # ===== Stage 3: Deploy Staging (nur auf main) =====
+  # ===== Stage 3: Deploy Staging (nur auf master) =====
   - stage: DeployStaging
     displayName: 'Deploy to Staging'
     dependsOn: Test
-    condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'main'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
     jobs:
       - job: DeployJob
         displayName: 'Deploy to Staging'
@@ -220,7 +222,7 @@ stages:
   - stage: DeployProduction
     displayName: 'Deploy to Production'
     dependsOn: DeployStaging
-    condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'main'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
     jobs:
       - job: DeployProd
         displayName: 'Deploy to Production'
@@ -252,9 +254,9 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
   Enthält zwei Jobs (`UnitTests` und `LintCheck`), die **parallel** laufen, da
   sie keine `dependsOn`-Beziehung zueinander haben. Das spart Zeit.
 - **Deploy-Stages**: Beide haben eine `condition`, die prüft, ob der Build auf
-  dem `main`-Branch läuft. `and(succeeded(), eq(...))` stellt sicher, dass die
+  dem `master`-Branch läuft. `and(succeeded(), eq(...))` stellt sicher, dass die
   Stage nur ausgeführt wird, wenn (a) alle vorherigen Stages erfolgreich waren
-  und (b) der Branch `main` ist. Auf Feature-Branches werden die Deploy-Stages
+  und (b) der Branch `master` ist. Auf Feature-Branches werden die Deploy-Stages
   übersprungen.
 - **Artefakt-Download**: In den Deploy-Stages wird mit `download: current`
   das zuvor publizierte Artefakt heruntergeladen. `current` bezieht sich auf den
@@ -262,13 +264,13 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
 
 ### Schritt 3: Committen und Pipeline beobachten
 
-Committe alle neuen Dateien und pushe auf `main`. Die Pipeline wird automatisch
+Committe alle neuen Dateien und pushe auf `master`. Die Pipeline wird automatisch
 gestartet und durchläuft alle vier Stages:
 
 ```bash
 git add package.json src/app.js test/test.js azure-pipelines.yml
 git commit -m "Add multi-stage pipeline with Node.js app"
-git push origin main
+git push origin master
 ```
 
 ### Schritt 4: Pipeline-Visualisierung anschauen
@@ -294,6 +296,7 @@ Um die Conditions in Aktion zu sehen, erstellen wir einen Feature-Branch und
 beobachten, welche Stages übersprungen werden:
 
 **Bash:**
+
 ```bash
 git checkout -b feature/test-condition
 echo "// neue Funktion" >> src/app.js
@@ -303,6 +306,7 @@ git push origin feature/test-condition
 ```
 
 **PowerShell:**
+
 ```powershell
 git checkout -b feature/test-condition
 Add-Content -Path src/app.js -Value "// neue Funktion" -NoNewline:$false
@@ -318,16 +322,16 @@ Branch `feature/test-condition`.
 
 Beobachte das Ergebnis: **Build** und **Test** werden ausgeführt, aber die
 beiden **Deploy-Stages werden übersprungen** (grau dargestellt). Der Grund ist
-die `condition: eq(variables['Build.SourceBranchName'], 'main')` - auf einem
+die `condition: eq(variables['Build.SourceBranchName'], 'master')` - auf einem
 Feature-Branch ist diese Bedingung nicht erfüllt. So stellst du sicher, dass nur
-getesteter Code auf `main` deployed wird.
+getesteter Code auf `master` deployed wird.
 
 ## Aufräumen
 
 Lösche den Feature-Branch, da er nur für den Test benötigt wurde:
 
 ```bash
-git checkout main
+git checkout master
 git branch -d feature/test-condition
 git push origin --delete feature/test-condition
 ```

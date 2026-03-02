@@ -163,6 +163,7 @@ HEALTHCHECK --interval=30s --timeout=3s \
 <style scoped>
 section { font-size: 1rem; }
 </style>
+
 ```yaml
 stages:
   - stage: Build
@@ -250,6 +251,7 @@ section {
     font-size: 1.4rem;
 }
 </style>
+
 ```yaml
 variables:
   npm_config_cache: $(Pipeline.Workspace)/.npm
@@ -279,6 +281,7 @@ section {
     font-size: 1.6rem;
 }
 </style>
+
 ```yaml
 variables:
   pip_cache_dir: $(Pipeline.Workspace)/.pip

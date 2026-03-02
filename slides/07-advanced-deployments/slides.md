@@ -151,6 +151,7 @@ section {
     font-size: 1.4rem;
 }
 </style>
+
 ```yaml
   - stage: SwapSlots
     displayName: 'Swap Blue/Green'
@@ -373,7 +374,6 @@ strategy:
 
 ## 11. Lifecycle Hooks
 
-
 Deployment-Strategien bieten mehrere **Lifecycle Hooks**:
 
 | Hook                  | Zeitpunkt                          | Typischer Einsatz          |
@@ -392,6 +392,7 @@ section {
     font-size: 1.3rem;
 }
 </style>
+
 ```yaml
 strategy:
   runOnce:

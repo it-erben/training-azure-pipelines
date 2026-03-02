@@ -119,6 +119,7 @@ an `*.md`-Dateien hingegen nicht.
 Erstelle die folgenden Verzeichnisse und Dateien:
 
 **Bash:**
+
 ```bash
 # Verzeichnisse erstellen (-p sorgt dafür, dass kein Fehler auftritt,
 # falls die Verzeichnisse schon existieren)
@@ -126,6 +127,7 @@ mkdir -p src docs
 ```
 
 **PowerShell:**
+
 ```powershell
 # Verzeichnisse erstellen (-Force sorgt dafür, dass kein Fehler auftritt,
 # falls die Verzeichnisse schon existieren)

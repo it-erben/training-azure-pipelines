@@ -246,7 +246,7 @@ Platzhalter `<dein-kürzel>` mit deinem persönlichen Kürzel:
 trigger:
   branches:
     include:
-      - main
+      - master
   paths:
     include:
       - bicep/*
@@ -442,7 +442,7 @@ $SUFFIX = ($env:USERNAME).Substring(0,3)
 ```bash
 git add bicep/main.bicep bicep/dev.parameters.json azure-pipelines.yml
 git commit -m "Add Bicep IaC pipeline"
-git push origin main
+git push origin master
 ```
 
 Beobachte den Pipeline-Run im Browser. Die vier Stages laufen nacheinander:
