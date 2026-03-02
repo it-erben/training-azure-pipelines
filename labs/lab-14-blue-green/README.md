@@ -64,7 +64,6 @@ Deine Web App (`app-training-teilnehmerNN`) läuft bereits auf einem S1-Plan,
 der Deployment Slots unterstützt. In diesem Schritt erstellst du den
 Staging-Slot und konfigurierst Slot-Sticky Settings.
 
-
 Falls noch nicht geschehen in der letzten Übungsaufgabe, setze
 den APP_NAME als Variable:
 **Bash:**

@@ -26,6 +26,7 @@
 |-----|-------|---------------|-------|
 | [Lab 06](lab-06-multi-stage/) | Multi-Stage Pipelines | Intermediate | 30 Min |
 | [Lab 07](lab-07-artefakte/) | Build-Artefakte erzeugen und publizieren | Intermediate | 25 Min |
+| [Lab 07b](lab-07b-azure-artifacts/) | npm-Pakete in Azure Artifacts publizieren | Intermediate | 20 Min |
 
 ## Modul 05: Containerisierung und Optimierung
 
