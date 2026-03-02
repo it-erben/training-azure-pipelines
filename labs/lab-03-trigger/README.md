@@ -20,7 +20,7 @@ sicher, dass nur relevante Änderungen einen Build auslösen.
 
 Um die verschiedenen Trigger-Konfigurationen zu testen, brauchen wir einen
 separaten Branch. In einem typischen Git-Workflow entwickelt man neue Features
-in **Feature-Branches**, die erst nach einem Review per Pull Request in `master`
+in **Feature-Branches**, die erst nach einem Review per Pull Request in `main`
 gemerged werden.
 
 Wechsle in das Verzeichnis deines `hello-pipeline`-Repositories und erstelle
@@ -28,7 +28,7 @@ einen Feature-Branch:
 
 ```bash
 # Erstelle einen neuen Branch namens "feature/add-css" und wechsle direkt
-# hinein. Der Branch basiert auf dem aktuellen Stand von master.
+# hinein. Der Branch basiert auf dem aktuellen Stand von main.
 git checkout -b feature/add-css
 ```
 
@@ -52,7 +52,7 @@ Konfiguration. Die neue Version definiert drei Trigger-Arten:
 trigger:
   branches:
     include:
-      - master
+      - main
       - release/*
     exclude:
       - feature/experimental-*
@@ -67,7 +67,7 @@ trigger:
 pr:
   branches:
     include:
-      - master
+      - main
   paths:
     exclude:
       - '*.md'
@@ -77,7 +77,7 @@ schedules:
     displayName: 'Werktags um 06:00 UTC'
     branches:
       include:
-        - master
+        - main
     always: false  # Nur ausführen, wenn es Änderungen gab
 
 pool:
@@ -181,21 +181,21 @@ git push origin feature/add-css
 
 Prüfe in Azure DevOps unter **Pipelines**: Es sollte **kein** neuer Build
 gestartet werden. Der Grund: In der `trigger`-Konfiguration sind unter
-`branches.include` nur `master` und `release/*` aufgeführt - der Branch
+`branches.include` nur `main` und `release/*` aufgeführt - der Branch
 `feature/add-css` ist nicht enthalten und wird daher ignoriert.
 
-**Test 2: Push auf master (sollte triggern)**
+**Test 2: Push auf main (sollte triggern)**
 
-Wechsle auf den Branch `master` und merge den Feature-Branch:
+Wechsle auf den Branch `main` und merge den Feature-Branch:
 
 ```bash
-git checkout master
+git checkout main
 git merge feature/add-css
-git push origin master
+git push origin main
 ```
 
 Prüfe in Azure DevOps: Es sollte ein Build gestartet werden. Der Branch
-`master` ist in `branches.include` enthalten, und es wurden Dateien unter `src/`
+`main` ist in `branches.include` enthalten, und es wurden Dateien unter `src/`
 geändert, die in `paths.include` erfasst sind. Beide Bedingungen müssen
 gleichzeitig erfüllt sein.
 
@@ -207,11 +207,11 @@ gleichzeitig erfüllt sein.
 ```bash
 git add docs/README.md
 git commit -m "Update documentation"
-git push origin master
+git push origin main
 ```
 
 Prüfe in Azure DevOps: Es sollte **kein** Build gestartet werden. Zwar ist der
-Branch `master` im Include, aber die geänderte Datei liegt unter `docs/*` und
+Branch `main` im Include, aber die geänderte Datei liegt unter `docs/*` und
 hat die Endung `*.md` - beides ist in `paths.exclude` ausgeschlossen. Path-
 Excludes haben Vorrang: Wenn alle geänderten Dateien ausgeschlossen sind, wird
 kein Build ausgelöst.
@@ -225,7 +225,7 @@ keinen Einfluss auf die Pipeline-Logik:
 ```bash
 git add azure-pipelines.yml
 git commit -m "Add comment to pipeline file"
-git push origin master
+git push origin main
 ```
 
 Prüfe in Azure DevOps: Ein Build wird gestartet, da `azure-pipelines.yml`
@@ -254,9 +254,9 @@ az pipelines runs show --id <run-id> --output json | jq
 # az pipelines runs list --top 5 --output table
 Run ID  Number      Status     Result     Source Branch
 ------  ----------  ---------  ---------  -------------------
-3       20260222.3  completed  succeeded  refs/heads/master       # Test 4
-2       20260222.2  completed  succeeded  refs/heads/master       # Test 2
-1       20260222.1  completed  succeeded  refs/heads/master       # Lab 02
+3       20260222.3  completed  succeeded  refs/heads/main       # Test 4
+2       20260222.2  completed  succeeded  refs/heads/main       # Test 2
+1       20260222.1  completed  succeeded  refs/heads/main       # Lab 02
 ```
 
 Beachte: Test 1 (Feature-Branch) und Test 3 (nur Doku) sollten **keine** Builds

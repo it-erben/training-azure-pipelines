@@ -194,13 +194,12 @@ Lege folgende Datei an:
 
 **index.html**
 
-```bash
-# Einfache HTML-Seite erstellen - das wird unser "Anwendungscode"
+```html
 <!DOCTYPE html>
 <html>
 <head><title>Hello Pipeline</title></head>
 <body><h1>Hello from Azure Pipelines!</h1></body>
-</html> 
+</html>
 ```
 
 Committe und pushe sie dann:
