@@ -40,6 +40,7 @@ trigger:
   branches:
     include:
       - main
+      - master
 
 pool:
   vmImage: 'ubuntu-22.04'
@@ -83,7 +84,7 @@ finden kann. Committe und pushe die Datei:
 ```bash
 git add azure-pipelines.yml
 git commit -m "Add initial pipeline definition"
-git push origin main
+git push
 ```
 
 Damit liegt die Datei auf dem Remote-Repository in Azure DevOps. Im nächsten
