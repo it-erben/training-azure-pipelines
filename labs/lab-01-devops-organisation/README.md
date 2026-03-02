@@ -5,8 +5,8 @@
 Azure DevOps ist die zentrale Plattform von Microsoft für
 Software-Entwicklungsteams. Sie bietet Boards (Projektmanagement), Repos (
 Git-Repositories), Pipelines (CI/CD), Test Plans und Artifacts. Alles beginnt
-mit einer **Organisation**, die als Container für alle Projekte dient. Ein *
-*Projekt** bündelt Repos, Pipelines und Boards zu einer logischen Einheit.
+mit einer **Organisation**, die als Container für alle Projekte dient. Ein 
+**Projekt** bündelt Repos, Pipelines und Boards zu einer logischen Einheit.
 
 In diesem Lab lernst du dein vorbereitetes Projekt kennen und richtest dein
 erstes Repository ein. Alle folgenden Labs bauen darauf auf.
