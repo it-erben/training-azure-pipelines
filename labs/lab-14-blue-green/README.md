@@ -89,11 +89,13 @@ az webapp deployment slot create \
   --slot staging \
   --output table
 
-# Slot-sticky Settings: SLOT_NAME bleibt beim Swap am jeweiligen Slot
+# Slot-sticky Settings: SLOT_NAME bleibt beim Swap am jeweiligen Slot.
+# Ohne --slot wirkt der Befehl auf den Production-Slot (= die Web App selbst).
 az webapp config appsettings set \
   --name $APP_NAME --resource-group rg-pipeline-training \
   --slot-settings SLOT_NAME=production
 
+# Mit --slot staging setzen wir das Setting für den Staging-Slot.
 az webapp config appsettings set \
   --name $APP_NAME --resource-group rg-pipeline-training \
   --slot staging \
@@ -113,11 +115,13 @@ az webapp deployment slot create `
   --slot staging `
   --output table
 
-# Slot-sticky Settings: SLOT_NAME bleibt beim Swap am jeweiligen Slot
+# Slot-sticky Settings: SLOT_NAME bleibt beim Swap am jeweiligen Slot.
+# Ohne --slot wirkt der Befehl auf den Production-Slot (= die Web App selbst).
 az webapp config appsettings set `
   --name $APP_NAME --resource-group rg-pipeline-training `
   --slot-settings SLOT_NAME=production
 
+# Mit --slot staging setzen wir das Setting für den Staging-Slot.
 az webapp config appsettings set `
   --name $APP_NAME --resource-group rg-pipeline-training `
   --slot staging `
@@ -127,15 +131,20 @@ echo "Production URL: https://$APP_NAME.azurewebsites.net"
 echo "Staging URL:    https://$APP_NAME-staging.azurewebsites.net"
 ```
 
+Hier wird nur der **Staging-Slot** explizit erstellt. Der **Production-Slot**
+ist die Web App selbst — er existiert automatisch seit `az webapp create` in
+Lab 13. Befehle ohne `--slot` wirken immer auf diesen Production-Slot.
+
 Nach der Erstellung hast du zwei erreichbare URLs: Die **Production-URL**
 (`<app>.azurewebsites.net`) und die **Staging-URL**
 (`<app>-staging.azurewebsites.net`). Beide sind unabhängige Instanzen — ein
 Deployment in den Staging-Slot hat keine Auswirkung auf die Production-URL.
 
-Das `--slot-settings`-Flag markiert `SLOT_NAME` als **Deployment Slot Setting**
-(slot-sticky). Beim Swap bleibt dieses Setting an seinem Slot — es wandert
-nicht mit dem Code mit. Der Production-Slot zeigt also immer `production` und
-der Staging-Slot immer `staging`, unabhängig davon, welcher Code dort läuft.
+Das `--slot-settings`-Flag setzt den Wert **und** markiert `SLOT_NAME` als
+**Deployment Slot Setting** (slot-sticky). Beim Swap bleibt dieses Setting an
+seinem Slot — es wandert nicht mit dem Code mit. Der Production-Slot zeigt
+also immer `production` und der Staging-Slot immer `staging`, unabhängig
+davon, welcher Code dort läuft.
 
 ### Schritt 2: App mit Versionsanzeige vorbereiten (v1)
 
@@ -170,7 +179,7 @@ const server = http.createServer((req, res) => {
     <!DOCTYPE html>
     <html>
     <head><title>Hello Pipeline - v${APP_VERSION}</title></head>
-    <body style="font-family: Arial; padding: 40px; background: ${SLOT_NAME === 'staging' ? '#fff3cd' : '#d4edda'};">
+    <body style="font-family: Arial; padding: 40px; background: ${SLOT_NAME === 'staging' ? '#d4edda' : '#cce5ff'};">
       <h1>Hello from Azure Pipelines!</h1>
       <p><strong>Version:</strong> ${APP_VERSION}</p>
       <p><strong>Slot:</strong> ${SLOT_NAME}</p>
@@ -194,8 +203,8 @@ Der Server liest zwei Umgebungsvariablen:
   App-Setting, das wir in Schritt 1 konfiguriert haben.
 
 Die Hauptseite zeigt je nach Slot eine unterschiedliche Hintergrundfarbe:
-**Gelb für Staging**, **Grün für Production**. So siehst du im Browser auf einen
-Blick, welcher Slot gerade aktiv ist.
+**Grün für Staging (Green)**, **Blau für Production (Blue)**. So siehst du im
+Browser auf einen Blick, welcher Slot gerade aktiv ist.
 
 ### Schritt 3: Version 1 nach Production deployen
 
@@ -229,7 +238,7 @@ Du solltest diese Antwort sehen:
 ```
 
 Öffne auch `https://<app-name>.azurewebsites.net` im Browser: Du siehst die
-Seite mit **grünem Hintergrund**, dem Titel "Hello from Azure Pipelines!" und
+Seite mit **blauem Hintergrund**, dem Titel "Hello from Azure Pipelines!" und
 `Slot: production`. Das ist deine stabile Blue-Version.
 
 ### Schritt 4: Code für Version 2 ändern
@@ -480,9 +489,9 @@ Invoke-RestMethod https://$APP_NAME-staging.azurewebsites.net/health
 
 Öffne beide URLs auch im Browser:
 
-- **Production** (`<app>.azurewebsites.net`): Grüner Hintergrund, Titel "Hello
+- **Production** (`<app>.azurewebsites.net`): Blauer Hintergrund, Titel "Hello
   from Azure Pipelines!", `version: 1.0.0`, `slot: production`.
-- **Staging** (`<app>-staging.azurewebsites.net`): Gelber Hintergrund, Titel
+- **Staging** (`<app>-staging.azurewebsites.net`): Grüner Hintergrund, Titel
   "Hello from Azure Pipelines v2!", `version: 1.0.XX`, `slot: staging`.
 
 Du siehst zwei verschiedene Versionen gleichzeitig — die alte und die neue. Die
@@ -522,8 +531,8 @@ Erwartete Ergebnisse:
 - **Staging**: `version: 1.0.0`, `slot: staging` — die alte Version ist im
   Staging-Slot gelandet, bereit für einen sofortigen Rollback.
 
-Im Browser siehst du: Production hat weiterhin einen **grünen** Hintergrund und
-Staging einen **gelben** — obwohl der Code getauscht wurde. Die Farbe folgt dem
+Im Browser siehst du: Production hat weiterhin einen **blauen** Hintergrund und
+Staging einen **grünen** — obwohl der Code getauscht wurde. Die Farbe folgt dem
 Slot, nicht dem Code, weil `SLOT_NAME` slot-sticky ist.
 
 ### Schritt 9: Rollback testen (optional)
