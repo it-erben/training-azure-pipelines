@@ -79,6 +79,9 @@ az extension add --name azure-devops --yes
 # Wir setzen die aktive Azure-Subscription, damit alle nachfolgenden Befehle
 # im richtigen Abrechnungskontext laufen. Die ID identifiziert die
 # Trainings-Subscription.
+# Zuerst melden wir uns mit az login an.
+
+az login
 az account set --subscription "30b490cd-637c-4934-87a7-a38eba455adf"
 ```
 
