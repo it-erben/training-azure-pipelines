@@ -89,11 +89,13 @@ az webapp deployment slot create \
   --slot staging \
   --output table
 
-# Slot-sticky Settings: SLOT_NAME bleibt beim Swap am jeweiligen Slot
+# Slot-sticky Settings: SLOT_NAME bleibt beim Swap am jeweiligen Slot.
+# Ohne --slot wirkt der Befehl auf den Production-Slot (= die Web App selbst).
 az webapp config appsettings set \
   --name $APP_NAME --resource-group rg-pipeline-training \
   --slot-settings SLOT_NAME=production
 
+# Mit --slot staging setzen wir das Setting für den Staging-Slot.
 az webapp config appsettings set \
   --name $APP_NAME --resource-group rg-pipeline-training \
   --slot staging \
@@ -113,11 +115,13 @@ az webapp deployment slot create `
   --slot staging `
   --output table
 
-# Slot-sticky Settings: SLOT_NAME bleibt beim Swap am jeweiligen Slot
+# Slot-sticky Settings: SLOT_NAME bleibt beim Swap am jeweiligen Slot.
+# Ohne --slot wirkt der Befehl auf den Production-Slot (= die Web App selbst).
 az webapp config appsettings set `
   --name $APP_NAME --resource-group rg-pipeline-training `
   --slot-settings SLOT_NAME=production
 
+# Mit --slot staging setzen wir das Setting für den Staging-Slot.
 az webapp config appsettings set `
   --name $APP_NAME --resource-group rg-pipeline-training `
   --slot staging `
@@ -127,15 +131,20 @@ echo "Production URL: https://$APP_NAME.azurewebsites.net"
 echo "Staging URL:    https://$APP_NAME-staging.azurewebsites.net"
 ```
 
+Hier wird nur der **Staging-Slot** explizit erstellt. Der **Production-Slot**
+ist die Web App selbst — er existiert automatisch seit `az webapp create` in
+Lab 13. Befehle ohne `--slot` wirken immer auf diesen Production-Slot.
+
 Nach der Erstellung hast du zwei erreichbare URLs: Die **Production-URL**
 (`<app>.azurewebsites.net`) und die **Staging-URL**
 (`<app>-staging.azurewebsites.net`). Beide sind unabhängige Instanzen — ein
 Deployment in den Staging-Slot hat keine Auswirkung auf die Production-URL.
 
-Das `--slot-settings`-Flag markiert `SLOT_NAME` als **Deployment Slot Setting**
-(slot-sticky). Beim Swap bleibt dieses Setting an seinem Slot — es wandert
-nicht mit dem Code mit. Der Production-Slot zeigt also immer `production` und
-der Staging-Slot immer `staging`, unabhängig davon, welcher Code dort läuft.
+Das `--slot-settings`-Flag setzt den Wert **und** markiert `SLOT_NAME` als
+**Deployment Slot Setting** (slot-sticky). Beim Swap bleibt dieses Setting an
+seinem Slot — es wandert nicht mit dem Code mit. Der Production-Slot zeigt
+also immer `production` und der Staging-Slot immer `staging`, unabhängig
+davon, welcher Code dort läuft.
 
 ### Schritt 2: App mit Versionsanzeige vorbereiten (v1)
 
