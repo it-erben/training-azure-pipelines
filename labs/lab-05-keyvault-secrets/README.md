@@ -33,12 +33,14 @@ Dein Key Vault ist bereits angelegt. Setze zuerst den Namen als Variable und
 prüfe, ob alles vorhanden ist:
 
 **Bash:**
+
 ```bash
 # Setze den Key-Vault-Namen (NN = deine Teilnehmernummer, z.B. 01)
 KV_NAME="kv-training-teilnehmerNN"
 ```
 
 **PowerShell:**
+
 ```powershell
 # Setze den Key-Vault-Namen (NN = deine Teilnehmernummer, z.B. 01)
 $KV_NAME = "kv-training-teilnehmerNN"
@@ -82,6 +84,7 @@ der Key-Vault-Integration in Variable Groups jedoch nicht unterstützt.
 Setze zuerst die Zugangsdaten, die du vom Trainer erhalten hast:
 
 **Bash:**
+
 ```bash
 # Zugangsdaten des Service Principals (vom Trainer erhalten)
 SP_APP_ID="<App-ID vom Trainer>"
@@ -90,6 +93,7 @@ SP_TENANT="<Tenant-ID vom Trainer>"
 ```
 
 **PowerShell:**
+
 ```powershell
 # Zugangsdaten des Service Principals (vom Trainer erhalten)
 $SP_APP_ID = "<App-ID vom Trainer>"
@@ -101,6 +105,7 @@ Erstelle nun die Service Connection in Azure DevOps. Das Client Secret wird
 über eine Umgebungsvariable übergeben:
 
 **Bash:**
+
 ```bash
 # Service Connection erstellen. Das Secret wird per Umgebungsvariable
 # übergeben, damit es nicht in der Shell-Historie landet.
@@ -118,6 +123,7 @@ unset AZURE_DEVOPS_EXT_AZURE_RM_SERVICE_PRINCIPAL_KEY
 ```
 
 **PowerShell:**
+
 ```powershell
 # Service Connection erstellen. Das Secret wird per Umgebungsvariable
 # übergeben, damit es nicht in der Shell-Historie landet.
@@ -137,6 +143,7 @@ Remove-Item env:AZURE_DEVOPS_EXT_AZURE_RM_SERVICE_PRINCIPAL_KEY
 Gib die Service Connection für alle Pipelines frei:
 
 **Bash:**
+
 ```bash
 # Service Connection für alle Pipelines freigeben
 SC_ID=$(az devops service-endpoint list --output json | \
@@ -149,6 +156,7 @@ az devops service-endpoint update \
 ```
 
 **PowerShell:**
+
 ```powershell
 # Service Connection für alle Pipelines freigeben
 $SC_ID = (az devops service-endpoint list --output json |
@@ -292,7 +300,6 @@ würde, zeigt Azure Pipelines stattdessen `***`. Diese Maskierung greift
 automatisch für alle Variablen, die aus einer Key-Vault-verknüpften Variable
 Group stammen. Du musst dafür nichts extra konfigurieren.
 
-
 ## Aufräumen
 
 Der Key Vault und der Service Principal werden vom Trainer per Terraform
@@ -300,6 +307,7 @@ verwaltet und müssen nicht manuell gelöscht werden. Lösche nur die Ressourcen
 die du in diesem Lab selbst erstellt hast:
 
 **Bash:**
+
 ```bash
 # Service Connection löschen
 SC_ID=$(az devops service-endpoint list --output json | \
@@ -312,6 +320,7 @@ az pipelines variable-group delete --group-id $GROUP_ID --yes
 ```
 
 **PowerShell:**
+
 ```powershell
 # Service Connection löschen
 $SC_ID = (az devops service-endpoint list --output json |

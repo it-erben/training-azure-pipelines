@@ -86,6 +86,7 @@ Build eindeutig identifizierbar ist.
 Mache das Skript ausführbar:
 
 **Bash auf UNIX-Systemen (Linux, macOS):**
+
 ```bash
 git checkout master
 git add build.sh
@@ -93,6 +94,7 @@ chmod +x build.sh
 ```
 
 **PowerShell:**
+
 ```powershell
 git checkout master
 git add build.sh
@@ -137,11 +139,13 @@ Report automatisch erzeugen. Hier simulieren wir das Ergebnis, um den
 Mache auch dieses Skript ausführbar:
 
 **Bash auf UNIX-Systemen (Linux, macOS):**
+
 ```bash
 chmod +x test/generate-report.sh
 ```
 
 **PowerShell:**
+
 ```powershell
 git add test/generate-report.sh
 git update-index --chmod=+x test/generate-report.sh

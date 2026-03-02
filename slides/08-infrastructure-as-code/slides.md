@@ -224,7 +224,6 @@ section {
 }
 </style>
 
-
 | Aspekt              | Bicep                           | ARM Template (JSON)              |
 |:--------------------|:--------------------------------|:---------------------------------|
 | Syntax              | Kurz und lesbar                 | Verbose JSON                     |
@@ -241,6 +240,7 @@ section {
 ---
 
 ## 3.2 Bicep: What-If und Parameter-Dateien
+
 <style scoped>
 section {
     font-size: 1.5rem;
@@ -318,6 +318,7 @@ stages:
 ---
 
 ## 4. Drift Detection Konzept
+
 <style scoped>
 section {
     font-size: 1.4rem;

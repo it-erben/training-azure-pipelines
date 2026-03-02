@@ -283,7 +283,10 @@ Der Service Principal braucht im Key Vault:
 - **Access Policy:** `Get` und `List` für Secrets
 
 > **Hinweis (Stand: 27. Februar 2026):**
-> Für die Verknüpfung **Variable Group <-> Key Vault** kann die Autorisierung mit App Registration (WIF) je nach Tenant/Setup mit einem internen Fehler scheitern. Nutze im Training daher den kompatiblen Fallback über **klassischen Service Principal + Access Policy**. 
+> Für die Verknüpfung **Variable Group <-> Key Vault** kann die Autorisierung
+> mit App Registration (WIF) je nach Tenant/Setup mit einem internen Fehler
+> scheitern. Nutze im Training daher den kompatiblen Fallback über
+> **klassischen Service Principal + Access Policy**.
 
 ---
 

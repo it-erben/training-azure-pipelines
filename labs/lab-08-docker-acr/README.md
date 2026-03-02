@@ -31,6 +31,7 @@ Zahlen enthalten (keine Bindestriche oder Unterstriche). Wir generieren einen
 eindeutigen Namen mit deinen Initialien:
 
 **Bash:**
+
 ```bash
 # Eindeutigen ACR-Namen generieren
 INITIALS="DEINE_INITIALEN"
@@ -39,6 +40,7 @@ echo "ACR Name: $ACR_NAME"
 ```
 
 **PowerShell:**
+
 ```powershell
 # Eindeutigen ACR-Namen generieren
 $INITIALS = "<DEINE_INITIALEN_KLEIN_GESCHRIEBEN>"
@@ -47,6 +49,7 @@ echo "ACR Name: $ACR_NAME"
 ```
 
 **Bash:**
+
 ```bash
 # ACR erstellen (Basic SKU: günstigste Option)
 az acr create \
@@ -59,6 +62,7 @@ az acr create \
 ```
 
 **PowerShell:**
+
 ```powershell
 # ACR erstellen (Basic SKU: günstigste Option)
 az acr create `
@@ -281,6 +285,7 @@ Lade dir das neue Image aus ACR
 herunter und teste:
 
 **Bash:**
+
 ```bash
 # ACR-Credentials holen
 ACR_PASSWORD=$(az acr credential show --name $ACR_NAME --query "passwords[0].value" -o tsv)
@@ -303,6 +308,7 @@ docker stop hello-test && docker rm hello-test
 ```
 
 **PowerShell:**
+
 ```powershell
 # ACR-Credentials holen
 $ACR_PASSWORD = (az acr credential show --name $ACR_NAME --query "passwords[0].value" -o tsv)

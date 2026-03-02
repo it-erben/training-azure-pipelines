@@ -46,6 +46,7 @@ Microsoft-hosted Agents sind bequem, aber manchmal reichen sie nicht:
 ---
 
 ## 1.1 Agent-Installation auf Linux
+
 <style scoped>
 section {
     font-size: 1.5rem;
@@ -195,6 +196,7 @@ section {
     font-size: 1.3rem;
 }
 </style>
+
 ## 2.2 Template-Parameter und Validierung
 
 Templates akzeptieren **typisierte Parameter** mit Validierung:
@@ -228,6 +230,7 @@ section {
     font-size: 1.5rem;
 }
 </style>
+
 ## 2.3 extends Keyword
 
 Das `extends` Keyword **erzwingt** die Nutzung eines Templates --
@@ -252,6 +255,7 @@ section {
     font-size: 1.5rem;
 }
 </style>
+
 ## 2.4 Externe Repos als Template-Quellen
 
 Templates können aus **anderen Repositories** eingebunden werden:
@@ -279,6 +283,7 @@ section {
     font-size: 1.2rem;
 }
 </style>
+
 ## 2.5 Code-Beispiel: Step Template
 
 ```yaml
@@ -312,6 +317,7 @@ section {
     font-size: 1.2rem;
 }
 </style>
+
 ## 2.6 Code-Beispiel: Stage Template
 
 ```yaml
@@ -349,6 +355,7 @@ section {
     font-size: 1.5rem;
 }
 </style>
+
 ## 3. Security Scanning: Überblick
 
 **Shift Left Security** - Sicherheit früh in der Pipeline
@@ -399,6 +406,7 @@ section {
     font-size: 1.5rem;
 }
 </style>
+
 ## 3.2 Dependency Scanning
 
 Prüft alle Abhängigkeiten auf **bekannte Schwachstellen** (CVEs):
@@ -426,6 +434,7 @@ section {
     font-size: 1.5rem;
 }
 </style>
+
 ## 3.3 Container Image Scanning
 
 Nach dem Build: Docker-Image auf Schwachstellen prüfen:
@@ -453,6 +462,7 @@ section {
     font-size: 1.2rem;
 }
 </style>
+
 ## 3.4 Secret Detection
 
 Erkennt versehentlich eingecheckte Credentials:

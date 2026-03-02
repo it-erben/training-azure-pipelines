@@ -60,11 +60,13 @@ Pipeline später aufruft (`npm run build`, `npm test`, `npm run lint`):
 Erstelle die Verzeichnisse und die Anwendungsdatei:
 
 **Bash:**
+
 ```bash
 mkdir -p src test
 ```
 
 **PowerShell:**
+
 ```powershell
 New-Item -ItemType Directory -Force -Path src, test | Out-Null
 ```
@@ -294,6 +296,7 @@ Um die Conditions in Aktion zu sehen, erstellen wir einen Feature-Branch und
 beobachten, welche Stages übersprungen werden:
 
 **Bash:**
+
 ```bash
 git checkout -b feature/test-condition
 echo "// neue Funktion" >> src/app.js
@@ -303,6 +306,7 @@ git push origin feature/test-condition
 ```
 
 **PowerShell:**
+
 ```powershell
 git checkout -b feature/test-condition
 Add-Content -Path src/app.js -Value "// neue Funktion" -NoNewline:$false

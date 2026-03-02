@@ -45,6 +45,7 @@ ist besonders nützlich für umgebungsspezifische Einstellungen, die sich zwisch
 Deployments unterscheiden.
 
 **Bash:**
+
 ```bash
 # Erstelle eine Variable Group namens "common-settings" mit drei Variablen.
 # --authorize true gibt die Gruppe für alle Pipelines im Projekt frei.
@@ -61,6 +62,7 @@ az pipelines variable-group create \
 ```
 
 **PowerShell:**
+
 ```powershell
 # Erstelle eine Variable Group namens "common-settings" mit drei Variablen.
 # --authorize true gibt die Gruppe für alle Pipelines im Projekt frei.
@@ -260,6 +262,7 @@ az pipelines list --output table
 ```
 
 **Bash:**
+
 ```bash
 # Pipeline mit Parametern starten (ersetze <pipeline-id> durch die
 # tatsächliche ID). Die Parameter werden als Key=Value-Paare übergeben.
@@ -268,6 +271,7 @@ az pipelines run --id <pipeline-id> \
 ```
 
 **PowerShell:**
+
 ```powershell
 # Pipeline mit Parametern starten (ersetze <pipeline-id> durch die
 # tatsächliche ID). Die Parameter werden als Key=Value-Paare übergeben.
@@ -293,6 +297,7 @@ az pipelines variable-group list --output table
 ```
 
 **Bash:**
+
 ```bash
 # Füge eine neue Variable zur Gruppe hinzu (ersetze <group-id> durch die
 # tatsächliche ID aus der vorherigen Ausgabe, z. B. 1).
@@ -310,6 +315,7 @@ az pipelines variable-group variable update \
 ```
 
 **PowerShell:**
+
 ```powershell
 # Füge eine neue Variable zur Gruppe hinzu (ersetze <group-id> durch die
 # tatsächliche ID aus der vorherigen Ausgabe, z. B. 1).

@@ -47,12 +47,14 @@ Der App-Name folgt dem Muster `app-training-teilnehmerNN` (z. B.
 `rg-pipeline-training`.
 
 **Bash:**
+
 ```bash
 # Setze deinen App-Namen (ersetze NN mit deiner Teilnehmernummer)
 APP_NAME="app-training-teilnehmerNN"
 ```
 
 **PowerShell:**
+
 ```powershell
 # Setze deinen App-Namen (ersetze NN mit deiner Teilnehmernummer)
 $APP_NAME = "app-training-teilnehmerNN"
@@ -333,6 +335,7 @@ Nach erfolgreichem Deployment sollte die App unter der Azure-URL erreichbar
 sein. Prüfe sowohl die Hauptseite als auch den Health-Endpoint:
 
 **Bash:**
+
 ```bash
 # Health Endpoint prüfen
 curl https://$APP_NAME.azurewebsites.net/health
@@ -342,6 +345,7 @@ curl https://$APP_NAME.azurewebsites.net
 ```
 
 **PowerShell:**
+
 ```powershell
 # Health Endpoint prüfen
 Invoke-RestMethod https://$APP_NAME.azurewebsites.net/health

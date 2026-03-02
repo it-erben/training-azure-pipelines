@@ -5,7 +5,7 @@
 Azure DevOps ist die zentrale Plattform von Microsoft für
 Software-Entwicklungsteams. Sie bietet Boards (Projektmanagement), Repos (
 Git-Repositories), Pipelines (CI/CD), Test Plans und Artifacts. Alles beginnt
-mit einer **Organisation**, die als Container für alle Projekte dient. Ein 
+mit einer **Organisation**, die als Container für alle Projekte dient. Ein
 **Projekt** bündelt Repos, Pipelines und Boards zu einer logischen Einheit.
 
 In diesem Lab lernst du dein vorbereitetes Projekt kennen und richtest dein
@@ -53,6 +53,7 @@ läuft und sich per Access Token mit Azure verbindet.
 Öffne **Git Bash** und führe die folgenden Befehle nacheinander aus:
 
 **Bash:**
+
 ```bash
 # Ersetze hier deine Teilnehmernummer (z. B. "01")
 TEILNEHMER_NR="<deine nummer>"
@@ -62,6 +63,7 @@ ORGANIZATION="iterben"
 ```
 
 **PowerShell:**
+
 ```powershell
 # Ersetze hier deine Teilnehmernummer (z. B. "01")
 $TEILNEHMER_NR = "<deine nummer>"
@@ -86,6 +88,7 @@ az account set --subscription "30b490cd-637c-4934-87a7-a38eba455adf"
 ```
 
 **Bash:**
+
 ```bash
 # Damit du nicht bei jedem CLI-Aufruf Organisation und Projekt angeben musst,
 # setzen wir beides als Default. Diese Einstellung wird in
@@ -96,6 +99,7 @@ az devops configure --defaults \
 ```
 
 **PowerShell:**
+
 ```powershell
 # Damit du nicht bei jedem CLI-Aufruf Organisation und Projekt angeben musst,
 # setzen wir beides als Default. Diese Einstellung wird in
@@ -144,11 +148,13 @@ dediziertes Repository namens `hello-pipeline`. Ein Projekt kann beliebig
 viele Repositories enthalten.
 
 **Bash:**
+
 ```bash
 REPO_NAME="hello-pipeline"
 ```
 
 **PowerShell:**
+
 ```powershell
 $REPO_NAME = "hello-pipeline"
 ```
@@ -187,6 +193,7 @@ Pipeline verarbeitet werden kann.
 Lege folgende Datei an:
 
 **index.html**
+
 ```bash
 # Einfache HTML-Seite erstellen - das wird unser "Anwendungscode"
 <!DOCTYPE html>
@@ -217,6 +224,7 @@ Zum Abschluss prüfen wir, ob alles korrekt eingerichtet wurde - sowohl per CLI
 als auch im Browser:
 
 **Bash:**
+
 ```bash
 # Zeigt die Details deines Projekts an (Name, ID, Status).
 # Wenn dieser Befehl funktioniert, sind Organisation und Projekt korrekt
@@ -230,6 +238,7 @@ az repos list --output table
 ```
 
 **PowerShell:**
+
 ```powershell
 # Zeigt die Details deines Projekts an (Name, ID, Status).
 # Wenn dieser Befehl funktioniert, sind Organisation und Projekt korrekt

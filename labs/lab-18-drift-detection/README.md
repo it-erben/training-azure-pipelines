@@ -66,11 +66,13 @@ sind).
 Erstelle das Verzeichnis und die Script-Datei:
 
 **Bash:**
+
 ```bash
 mkdir -p scripts
 ```
 
 **PowerShell:**
+
 ```powershell
 New-Item -ItemType Directory -Force -Path scripts | Out-Null
 ```
@@ -208,11 +210,13 @@ Gehe das Script Abschnitt für Abschnitt durch:
 Mache das Script ausführbar:
 
 **Bash:**
+
 ```bash
 chmod +x scripts/detect-drift.sh
 ```
 
 **PowerShell:**
+
 ```powershell
 git add scripts/detect-drift.sh
 git update-index --chmod=+x scripts/detect-drift.sh

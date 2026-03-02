@@ -190,6 +190,7 @@ section { font-size: 1.3rem; }
 <style scoped>
 section { font-size: 1.4rem; }
 </style>
+
 ```yaml
 # Nur auf main-Branch deployen
 condition: >-
@@ -478,6 +479,7 @@ stages:
 <style scoped>
 section { font-size: 1.4rem; }
 </style>
+
 - **Stages logisch trennen** - Build, Test und Deploy in separate
   Stages aufteilen
 - **Parallele Jobs nutzen** - Unabhängige Aufgaben (Unit Tests,

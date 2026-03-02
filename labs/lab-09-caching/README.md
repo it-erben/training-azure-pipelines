@@ -289,8 +289,8 @@ git push origin master
 ```
 
 **Warte, bis der erste Build vollständig abgeschlossen ist.**
-Der Cache wird erst nach Abschluss aller Jobs gespeichert. Ein zweiter Lauf 
-während des ersten findet also noch keinen Cache. 
+Der Cache wird erst nach Abschluss aller Jobs gespeichert. Ein zweiter Lauf
+während des ersten findet also noch keinen Cache.
 
 Starte dann einen zweiten Build manuell:
 
