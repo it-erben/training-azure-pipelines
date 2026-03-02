@@ -175,7 +175,7 @@ warning: You appear to have cloned an empty repository.
 ```
 
 Die Warnung "empty repository" ist normal, denn das Repository enthält noch
-keine Commits. Den Default Branch (`main`) legt Git automatisch beim ersten Push
+keine Commits. Den Default Branch (`master`) legt Git automatisch beim ersten Push
 an.
 
 ### Schritt 6: Beispieldatei anlegen und pushen
@@ -200,11 +200,11 @@ Committe und pushe sie dann:
 
 ```bash
 # Datei zur Staging Area hinzufügen, committen und auf Azure DevOps pushen.
-# Beim ersten Push wird automatisch der Branch "main" als Default Branch
+# Beim ersten Push wird automatisch der Branch "master" als Default Branch
 # im Remote-Repository angelegt.
 git add index.html
 git commit -m "Initial commit: add index.html"
-git push origin main
+git push origin master
 ```
 
 Falls du beim Push nach Zugangsdaten gefragt wirst, öffnet sich ein
@@ -245,4 +245,4 @@ az repos list --output table
 Öffne zusätzlich im Browser die Organisation
 <https://dev.azure.com/iterben>, navigiere zu deinem Projekt und öffne den
 Bereich **Repos**. Dort solltest du das Repository `hello-pipeline` mit der
-Datei `index.html` im Branch `main` sehen können.
+Datei `index.html` im Branch `master` sehen können.

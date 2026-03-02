@@ -23,7 +23,7 @@ durchlaufen denselben Workflow wie Code-Änderungen.
 Die wichtigsten Elemente einer Pipeline-YAML:
 
 - **`trigger`**: Definiert, bei welchen Git-Events die Pipeline automatisch
-  startet (z. B. Push auf `main`).
+  startet (z. B. Push auf `master`).
 - **`pool`**: Gibt an, auf welcher Infrastruktur die Pipeline läuft. Mit
   `vmImage` nutzen wir einen von Microsoft gehosteten Agent.
 - **`steps`**: Die einzelnen Schritte, die nacheinander ausgeführt werden. Jeder
@@ -39,7 +39,6 @@ folgende Datei:
 trigger:
   branches:
     include:
-      - main
       - master
 
 pool:
@@ -145,7 +144,7 @@ az pipelines list --output table
 # Starte die Pipeline manuell (ersetze <pipeline-id> durch die tatsächliche ID
 # aus der vorherigen Ausgabe, z. B. 1).
 # --branch gibt an, welcher Branch ausgecheckt werden soll.
-az pipelines run --id <pipeline-id> --branch main --output table
+az pipelines run --id <pipeline-id> --branch master --output table
 
 # Prüfe den Status des letzten Builds.
 # --top 1 zeigt nur den neuesten Build an.

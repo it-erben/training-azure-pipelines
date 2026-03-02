@@ -210,7 +210,7 @@ Ersetze den Inhalt von `azure-pipelines.yml`:
 trigger:
   branches:
     include:
-      - main
+      - master
 
 # Beide Variable Groups einbinden: die reguläre aus Lab 04
 # und die Key-Vault-verknüpfte aus diesem Lab.
@@ -277,7 +277,7 @@ Committe und pushe die Änderung:
 ```bash
 git add azure-pipelines.yml
 git commit -m "Add Key Vault secrets integration"
-git push origin main
+git push origin master
 ```
 
 Beim ersten Lauf der Pipeline mit einer neuen Variable Group oder Service

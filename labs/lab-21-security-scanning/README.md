@@ -163,7 +163,7 @@ Ersetze den Inhalt von `azure-pipelines.yml`:
 trigger:
   branches:
     include:
-      - main
+      - master
 
 variables:
   nodeVersion: '20.x'
@@ -424,7 +424,7 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
 ```bash
 git add src/vulnerable-demo.js package.json azure-pipelines.yml
 git commit -m "Add security scanning pipeline"
-git push origin main
+git push origin master
 ```
 
 ### Schritt 4: Security-Findings analysieren
@@ -536,7 +536,7 @@ Lösche die verwundbare Datei und committe die sichere Version:
 rm src/vulnerable-demo.js
 git add src/secure-demo.js src/vulnerable-demo.js package.json
 git commit -m "Fix security vulnerabilities found by scanning"
-git push origin main
+git push origin master
 ```
 
 Beobachte den zweiten Pipeline-Run: Die Secret- und SAST-Scans sollten
@@ -621,7 +621,7 @@ Kein Aufräumen nötig. Die Pipeline hat keine Azure-Ressourcen erstellt.
   unterstützt Java, .NET, Python und viele weitere Ökosysteme.
 - **PR-Integration**: Konfiguriere Security-Scans als **Required Check** für
   Pull Requests. So wird kein Code mit bekannten Schwachstellen in den
-  `main`-Branch gemergt. Unter **Project Settings > Repositories > Policies**
+  `master`-Branch gemergt. Unter **Project Settings > Repositories > Policies**
   kannst du Build-Validierungen als Pflicht-Checks konfigurieren.
 - **Compliance**: In regulierten Branchen (Finanz, Gesundheit) können
   Security-Scans als Pflicht-Gates vorgeschrieben sein. Dokumentiere die

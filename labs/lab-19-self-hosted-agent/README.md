@@ -233,7 +233,7 @@ Ersetze den Inhalt von `azure-pipelines.yml`:
 trigger:
   branches:
     include:
-      - main
+      - master
 
 stages:
   # ===== Job auf Microsoft-hosted Agent =====
@@ -350,7 +350,7 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
 ```bash
 git add azure-pipelines.yml
 git commit -m "Add self-hosted agent pipeline"
-git push origin main
+git push origin master
 ```
 
 Beobachte den Pipeline-Run im Browser. Die beiden Stages `HostedBuild` und

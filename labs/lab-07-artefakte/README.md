@@ -87,14 +87,14 @@ Mache das Skript ausführbar:
 
 **Bash auf UNIX-Systemen (Linux, macOS):**
 ```bash
-git checkout main
+git checkout master
 git add build.sh
 chmod +x build.sh
 ```
 
 **PowerShell:**
 ```powershell
-git checkout main
+git checkout master
 git add build.sh
 # chmod existiert nicht auf Windows. Stattdessen setzen wir das
 # Executable-Bit direkt im Git-Index — der Pipeline-Agent (Linux)
@@ -157,7 +157,7 @@ Inhalt von `azure-pipelines.yml`:
 trigger:
   branches:
     include:
-      - main
+      - master
 
 variables:
   nodeVersion: '20.x'
@@ -304,7 +304,7 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
 ```bash
 git add build.sh test/generate-report.sh azure-pipelines.yml
 git commit -m "Add artifact publishing and verification"
-git push origin main
+git push origin master
 ```
 
 ### Schritt 5: Artefakte im Browser ansehen

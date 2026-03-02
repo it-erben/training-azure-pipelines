@@ -164,7 +164,7 @@ ACR-Namen (den du in Schritt 1 generiert hast):
 trigger:
   branches:
     include:
-      - main
+      - master
 
 variables:
   # Ersetze mit deinem ACR-Namen
@@ -267,7 +267,7 @@ Nachdem du den ACR-Namen gesetzt hast, kannst du committen und pushen:
 ```bash
 git add Dockerfile .dockerignore azure-pipelines.yml
 git commit -m "Add Docker build pipeline with ACR"
-git push origin main
+git push origin master
 ```
 
 Beim ersten Lauf der Pipeline mit der neuen Service Connection muss die Nutzung möglicherweise

@@ -261,7 +261,7 @@ Platzhalter `<dein-app-name>` mit deinem tatsächlichen App-Namen:
 trigger:
   branches:
     include:
-      - main
+      - master
 
 variables:
   azureSubscription: 'azure-training-connection'
@@ -443,7 +443,7 @@ Committe und pushe alle Dateien:
 ```bash
 git add src/server.js azure-pipelines.yml
 git commit -m "Add blue/green deployment with slot swap"
-git push origin main
+git push origin master
 ```
 
 Falls auf dem Production-Environment ein Approval Gate konfiguriert ist

@@ -310,7 +310,7 @@ Platzhalter `<dein-storage-account>` und `<dein-kürzel>`:
 trigger:
   branches:
     include:
-      - main
+      - master
   paths:
     include:
       - terraform/*
@@ -529,7 +529,7 @@ $SUFFIX = ($env:USERNAME).Substring(0,3)
 ```bash
 git add terraform/main.tf terraform/variables.tf terraform/outputs.tf terraform/dev.tfvars azure-pipelines.yml
 git commit -m "Add Terraform IaC pipeline"
-git push origin main
+git push origin master
 ```
 
 Beobachte den Pipeline-Run im Browser:

@@ -204,7 +204,7 @@ Platzhalter `<dein-app-name>` mit deinem tatsächlichen App-Namen aus Schritt 1:
 trigger:
   branches:
     include:
-      - main
+      - master
 
 variables:
   azureSubscription: 'azure-training-connection'
@@ -320,7 +320,7 @@ Ersetze den Platzhalter in der Pipeline-Datei und committe alle Dateien:
 ```bash
 git add src/server.js package.json web.config azure-pipelines.yml
 git commit -m "Add App Service deployment pipeline"
-git push origin main
+git push origin master
 ```
 
 Beim ersten Lauf kann es sein, dass die Pipeline die Nutzung der Service

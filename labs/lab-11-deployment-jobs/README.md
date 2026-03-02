@@ -81,7 +81,7 @@ Ersetze den Inhalt von `azure-pipelines.yml`:
 trigger:
   branches:
     include:
-      - main
+      - master
 
 variables:
   appVersion: '1.0.$(Build.BuildId)'
@@ -205,7 +205,7 @@ stages:
   - stage: DeployProduction
     displayName: 'Deploy Production'
     dependsOn: DeployStaging
-    condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'main'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
     jobs:
       - deployment: DeployToProd
         displayName: 'Deploy to Production'
@@ -270,7 +270,7 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
       senden (z. B. Slack/Teams) oder bei einem Fehler einen automatischen
       Rollback einleiten.
 - **DeployProduction-Stage**: Kombiniert Deployment Job und `condition`. Die
-  Stage wird nur auf dem `main`-Branch ausgeführt - auf Feature-Branches wird
+  Stage wird nur auf dem `master`-Branch ausgeführt - auf Feature-Branches wird
   sie übersprungen. Hier werden nur `preDeploy`, `deploy` und `on.success`
   verwendet; nicht jeder Hook muss in jeder Stage genutzt werden.
 
@@ -279,7 +279,7 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
 ```bash
 git add azure-pipelines.yml
 git commit -m "Add deployment jobs with environments"
-git push origin main
+git push origin master
 ```
 
 ### Schritt 4: Deployment-Historie prüfen

@@ -121,7 +121,7 @@ Ersetze den Inhalt von `azure-pipelines.yml`:
 trigger:
   branches:
     include:
-      - main
+      - master
 
 stages:
   - stage: BuildWithCache
@@ -285,7 +285,7 @@ die Pipeline bewusst zweimal aus.
 ```bash
 git add package.json package-lock.json requirements.txt azure-pipelines.yml
 git commit -m "Add caching to pipeline"
-git push origin main
+git push origin master
 ```
 
 **Warte, bis der erste Build vollständig abgeschlossen ist.**
@@ -300,7 +300,7 @@ az pipelines list --output table
 
 # Zweiten Build starten (ersetze <pipeline-id> durch die ID
 # aus der vorherigen Ausgabe)
-az pipelines run --id <pipeline-id> --branch main
+az pipelines run --id <pipeline-id> --branch master
 ```
 
 ### Schritt 4: Build-Zeiten vergleichen
