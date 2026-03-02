@@ -92,14 +92,12 @@ az webapp deployment slot create \
 # Slot-sticky Settings: SLOT_NAME bleibt beim Swap am jeweiligen Slot
 az webapp config appsettings set \
   --name $APP_NAME --resource-group rg-pipeline-training \
-  --settings SLOT_NAME=production \
-  --slot-settings SLOT_NAME
+  --slot-settings SLOT_NAME=production
 
 az webapp config appsettings set \
   --name $APP_NAME --resource-group rg-pipeline-training \
   --slot staging \
-  --settings SLOT_NAME=staging \
-  --slot-settings SLOT_NAME
+  --slot-settings SLOT_NAME=staging
 
 echo "Production URL: https://$APP_NAME.azurewebsites.net"
 echo "Staging URL:    https://$APP_NAME-staging.azurewebsites.net"
@@ -118,14 +116,12 @@ az webapp deployment slot create `
 # Slot-sticky Settings: SLOT_NAME bleibt beim Swap am jeweiligen Slot
 az webapp config appsettings set `
   --name $APP_NAME --resource-group rg-pipeline-training `
-  --settings SLOT_NAME=production `
-  --slot-settings SLOT_NAME
+  --slot-settings SLOT_NAME=production
 
 az webapp config appsettings set `
   --name $APP_NAME --resource-group rg-pipeline-training `
   --slot staging `
-  --settings SLOT_NAME=staging `
-  --slot-settings SLOT_NAME
+  --slot-settings SLOT_NAME=staging
 
 echo "Production URL: https://$APP_NAME.azurewebsites.net"
 echo "Staging URL:    https://$APP_NAME-staging.azurewebsites.net"
