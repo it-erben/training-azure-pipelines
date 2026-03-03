@@ -2,16 +2,16 @@
 
 ## Hintergrund
 
-In Lab 08 haben wir ein Docker-Image gebaut und in eine Azure Container Registry
-(ACR) gepusht. In Lab 13 haben wir eine Anwendung per ZIP-Paket auf einen App
-Service deployt. Aber wo laufen die Docker-Images eigentlich? In diesem Lab
-schließen wir die Lücke: Wir deployen das Docker-Image aus Lab 08 auf **Azure
-Container Instances (ACI)** - den einfachsten Weg, einen Container in Azure zu
-starten.
+In Lab 13 haben wir eine Anwendung per ZIP-Paket auf einen App Service deployt.
+Aber was, wenn wir unsere Anwendung als Docker-Container betreiben wollen? In
+diesem Lab bauen wir ein Docker-Image, pushen es in eine **Azure Container
+Registry (ACR)** und deployen es auf **Azure Container Instances (ACI)** - den
+einfachsten Weg, einen Container in Azure zu starten.
 
-ACI ist ein serverloser Container-Dienst: Kein Cluster, kein App Service Plan,
-keine VM - du gibst ein Image an und Azure startet es. Die Abrechnung erfolgt
-pro Sekunde nach tatsächlich genutzter CPU und RAM. Das macht ACI ideal für:
+**Azure Container Instances (ACI)** ist ein serverloser Container-Dienst: Kein
+Cluster, kein App Service Plan, keine VM - du gibst ein Image an und Azure
+startet es. Die Abrechnung erfolgt pro Sekunde nach tatsächlich genutzter CPU
+und RAM. Das macht ACI ideal für:
 
 - **Dev/Test**: Schnell einen Container starten und wieder löschen
 - **Batch-Jobs**: Einmalige Verarbeitungsaufgaben, die nach Abschluss gestoppt
@@ -26,46 +26,152 @@ Der Unterschied zu den anderen Deployment-Optionen:
 - **AKS** (Azure Kubernetes Service): Container-Orchestrierung für komplexe
   Microservice-Architekturen
 
-ACI kann Images aus ACR, Docker Hub oder privaten Registries ziehen. Wir nutzen
-die ACR aus Lab 08 und authentifizieren uns mit den Admin-Credentials, die wir
-dort aktiviert haben (`--admin-enabled true`).
-
 ## Voraussetzungen
 
-- Die **ACR aus Lab 08** mit dem Image `hello-pipeline`. Falls du die ACR nach
-  Lab 08 gelöscht hast, erstelle sie neu (siehe Lab 08, Schritt 1-3) und führe
-  die Pipeline einmal aus, damit das Image in der Registry liegt.
-- Die **Service Connections** `acr-training-connection` (Lab 08) und
-  `azure-training-connection` (Lab 05).
+- Die **Service Connection** `azure-training-connection` (Lab 05).
 - Das **Environment** `dev` aus Lab 11.
 
 ## Aufgabenstellung
 
-### Schritt 1: Pipeline mit Build und ACI-Deployment
+### Schritt 1: Neues Repository erstellen
+
+Erstelle in deinem Azure DevOps Projekt ein neues Git-Repository für dieses Lab:
+
+1. Gehe zu **Repos > Repositories** (oben links auf den Repository-Namen
+   klicken, dann **"Manage repositories"**).
+2. Klicke auf **"Create"**.
+3. Repository-Name: `aci-demo`.
+4. Klicke auf **"Create"**.
+5. Klone das neue Repository lokal:
+
+```bash
+git clone <url-des-neuen-repos>
+cd aci-demo
+```
+
+### Schritt 2: Azure Container Registry erstellen
+
+ACR-Namen müssen global eindeutig sein und dürfen nur Kleinbuchstaben und
+Zahlen enthalten (keine Bindestriche oder Unterstriche). Wir generieren einen
+eindeutigen Namen mit deinen Initialien:
+
+**Bash:**
+
+```bash
+# Eindeutigen ACR-Namen generieren
+INITIALS="deine_initialien_kleingeschrieben"
+ACR_NAME="acraci$INITIALS$RANDOM"
+echo "ACR Name: $ACR_NAME"
+
+# ACR erstellen (Basic SKU: günstigste Option)
+az acr create \
+  --name $ACR_NAME \
+  --resource-group rg-pipeline-training \
+  --location westeurope \
+  --sku Basic \
+  --admin-enabled true \
+  --output table
+```
+
+**PowerShell:**
+
+```powershell
+# Eindeutigen ACR-Namen generieren
+$INITIALS = "deine_initialien_kleingeschrieben"
+$ACR_NAME = "acraci$INITIALS$(Get-Random -Maximum 32768)"
+echo "ACR Name: $ACR_NAME"
+
+# ACR erstellen (Basic SKU: günstigste Option)
+az acr create `
+  --name $ACR_NAME `
+  --resource-group rg-pipeline-training `
+  --location westeurope `
+  --sku Basic `
+  --admin-enabled true `
+  --output table
+```
+
+### Schritt 3: Anwendung und Dockerfile erstellen
+
+Erstelle die Datei **index.html** im Repository-Wurzelverzeichnis:
+
+```html
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>ACI Demo</title>
+</head>
+<body>
+  <h1>Hello from Azure Container Instances!</h1>
+  <p>Dieses Image wurde per Azure Pipeline gebaut und auf ACI deployt.</p>
+</body>
+</html>
+```
+
+Erstelle die Datei **Dockerfile**:
+
+```dockerfile
+FROM nginx:alpine
+COPY index.html /usr/share/nginx/html/
+EXPOSE 80
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD wget -q --spider http://localhost/ || exit 1
+```
+
+Erstelle außerdem eine **.dockerignore**-Datei, um unnötige Dateien vom
+Docker-Build-Kontext auszuschließen:
+
+```
+.git
+*.md
+azure-pipelines.yml
+```
+
+### Schritt 4: Service Connection für ACR erstellen
+
+Damit die Pipeline Images in die ACR pushen kann, braucht sie eine
+authentifizierte Verbindung. Wir erstellen eine **Docker Registry Service
+Connection** in Azure DevOps:
+
+1. Gehe zu **Project Settings > Service connections**.
+2. Klicke auf **"New service connection"**.
+3. Wähle **"Docker Registry"**.
+4. Registry type: **"Azure Container Registry"**.
+5. Authentication Type: **"Service Principal"**.
+6. Subscription: Wähle die Trainings-Subscription.
+7. Azure Container Registry: Wähle deine soeben erstellte ACR aus der
+   Dropdown-Liste.
+8. Service Connection Name: `acr-aci-connection`.
+9. Setze den Haken bei **"Grant access permission to all pipelines"**.
+10. Klicke auf **"Save"**.
+
+
+### Schritt 5: Pipeline mit Build und ACI-Deployment
 
 Wir erstellen eine Pipeline mit drei Stages: **Build** baut das Docker-Image und
 pusht es in die ACR, **Deploy** erstellt eine Container Instance mit dem Image,
 und **Verify** prüft, ob der Container läuft und erreichbar ist.
 
-Ersetze den Inhalt von `azure-pipelines.yml`. **Wichtig**: Ersetze dabei den
+Erstelle die Datei `azure-pipelines.yml`. **Wichtig**: Ersetze dabei den
 Platzhalter `<dein-acr-name>` an beiden Stellen mit deinem tatsächlichen
-ACR-Namen (den du in Lab 08 generiert hast):
+ACR-Namen (den du in Schritt 2 generiert hast):
 
 ```yaml
 trigger:
   branches:
     include:
+      - main
       - master
 
 variables:
   azureSubscription: 'azure-training-connection'
-  # Ersetze mit deinem ACR-Namen
+  # Ersetze mit deinem ACR-Namen aus Schritt 2
   acrName: '<dein-acr-name>'
   acrLoginServer: '<dein-acr-name>.azurecr.io'
-  imageName: 'hello-pipeline'
+  imageName: 'aci-demo'
   imageTag: '$(Build.BuildNumber)'
-  containerName: 'hello-pipeline-aci'
-  dnsLabel: 'hello-pipeline-$(Build.BuildId)'
+  containerPrefix: 'aci-demo'
 
 stages:
   # ===== Build =====
@@ -80,7 +186,7 @@ stages:
           - task: Docker@2
             displayName: 'Docker Build and Push'
             inputs:
-              containerRegistry: 'acr-training-connection'
+              containerRegistry: 'acr-aci-connection'
               repository: '$(imageName)'
               command: 'buildAndPush'
               Dockerfile: '**/Dockerfile'
@@ -109,6 +215,18 @@ stages:
                     scriptType: 'bash'
                     scriptLocation: 'inlineScript'
                     inlineScript: |
+                      # Projektname in ACI-konformen Slug umwandeln
+                      RAW_PROJECT="$(System.TeamProject)"
+                      PROJECT_SLUG=$(echo "$RAW_PROJECT" \
+                        | tr '[:upper:]' '[:lower:]' \
+                        | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')
+                      PROJECT_SLUG="${PROJECT_SLUG:0:20}"
+
+                      CONTAINER_NAME="$(containerPrefix)-${PROJECT_SLUG}"
+                      DNS_LABEL="${CONTAINER_NAME}-$(Build.BuildId)"
+                      echo "Container-Name: $CONTAINER_NAME"
+                      echo "DNS-Label:      $DNS_LABEL"
+
                       # ACR-Credentials holen
                       ACR_PASSWORD=$(az acr credential show \
                         --name $(acrName) \
@@ -116,14 +234,14 @@ stages:
 
                       # Bestehenden Container löschen (falls vorhanden)
                       az container delete \
-                        --name $(containerName) \
+                        --name "$CONTAINER_NAME" \
                         --resource-group rg-pipeline-training \
                         --yes 2>/dev/null || true
 
                       # Auf asynchrone Löschung warten, damit create nicht kollidiert
                       for i in {1..24}; do
                         if ! az container show \
-                          --name $(containerName) \
+                          --name "$CONTAINER_NAME" \
                           --resource-group rg-pipeline-training \
                           --output none 2>/dev/null; then
                           echo "Vorheriger Container ist gelöscht."
@@ -135,13 +253,13 @@ stages:
 
                       # Container erstellen
                       az container create \
-                        --name $(containerName) \
+                        --name "$CONTAINER_NAME" \
                         --resource-group rg-pipeline-training \
                         --image $(acrLoginServer)/$(imageName):$(imageTag) \
                         --registry-login-server $(acrLoginServer) \
                         --registry-username $(acrName) \
                         --registry-password "$ACR_PASSWORD" \
-                        --dns-name-label $(dnsLabel) \
+                        --dns-name-label "$DNS_LABEL" \
                         --ports 80 \
                         --os-type Linux \
                         --cpu 1 \
@@ -151,7 +269,7 @@ stages:
                       echo ""
                       echo "Container erstellt. FQDN:"
                       az container show \
-                        --name $(containerName) \
+                        --name "$CONTAINER_NAME" \
                         --resource-group rg-pipeline-training \
                         --query "ipAddress.fqdn" -o tsv
 
@@ -171,15 +289,22 @@ stages:
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
+                RAW_PROJECT="$(System.TeamProject)"
+                PROJECT_SLUG=$(echo "$RAW_PROJECT" \
+                  | tr '[:upper:]' '[:lower:]' \
+                  | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')
+                PROJECT_SLUG="${PROJECT_SLUG:0:20}"
+                CONTAINER_NAME="$(containerPrefix)-${PROJECT_SLUG}"
+
                 echo "=== Container Status ==="
                 az container show \
-                  --name $(containerName) \
+                  --name "$CONTAINER_NAME" \
                   --resource-group rg-pipeline-training \
                   --query "{name:name, state:instanceView.state, image:containers[0].image, fqdn:ipAddress.fqdn}" \
                   --output table
 
                 FQDN=$(az container show \
-                  --name $(containerName) \
+                  --name "$CONTAINER_NAME" \
                   --resource-group rg-pipeline-training \
                   --query "ipAddress.fqdn" -o tsv)
 
@@ -195,60 +320,32 @@ stages:
                 fi
 ```
 
-Gehe die Pipeline Abschnitt für Abschnitt durch:
+### Schritt 6: Committen und Pipeline starten
 
-- **Variablen**: `acrName` und `acrLoginServer` verweisen auf die ACR aus
-  Lab 08. `containerName` ist der Name der Container Instance in Azure.
-  `dnsLabel` erzeugt mit `$(Build.BuildId)` bei jedem Run einen eindeutigen
-  DNS-Namen - das ist nötig, weil ACI bestehende Container nicht in-place
-  updaten kann und der alte Container vor dem Erstellen eines neuen gelöscht
-  wird.
-- **Build-Stage**: Identisch mit Lab 08 - der `Docker@2`-Task baut das Image
-  aus dem Dockerfile und pusht es mit der Build-Nummer und `latest` als Tags in
-  die ACR.
-- **Deploy-Stage**: Ein Deployment Job (wie Lab 13) mit `environment: 'dev'`,
-  damit die Deployment-Historie in Azure DevOps sichtbar ist. Der
-  `AzureCLI@2`-Task führt drei Schritte aus:
-    1. **ACR-Credentials holen**: `az acr credential show` liest das
-       Admin-Passwort der ACR aus. Das funktioniert, weil wir in Lab 08
-       `--admin-enabled true` gesetzt haben.
-    2. **Alten Container löschen und warten**: `az container delete ... || true`
-       entfernt einen eventuell vorhandenen Container gleichen Namens. Das
-       `|| true` verhindert einen Fehler, falls kein Container existiert. Danach
-       wartet eine kurze Schleife, bis der Container wirklich gelöscht ist, damit
-       das folgende `az container create` nicht mit "already exists" kollidiert.
-    3. **Container erstellen**: `az container create` startet eine neue Container
-       Instance mit dem Image aus der ACR. `--dns-name-label` weist einen
-       öffentlichen DNS-Namen zu, `--ports 80` öffnet den HTTP-Port, und
-       `--cpu 1 --memory 0.5` begrenzt die Ressourcen (1 vCPU, 0,5 GB RAM).
-- **Verify-Stage**: Ein normaler Job (kein Deployment Job), der den
-  Container-Status abfragt und einen HTTP Health Check durchführt. Nach 15
-  Sekunden Wartezeit wird per `curl` geprüft, ob der Container auf HTTP 200
-  antwortet.
-
-> **Warum `AzureCLI@2` statt eines speziellen Tasks?** Es gibt keinen
-> eingebauten ACI-Task in Azure Pipelines. `az container create` über den
-> `AzureCLI@2`-Task ist der empfohlene Weg und zeigt, wie CLI-basierte
-> Deployments in Pipelines funktionieren.
-
-### Schritt 2: Committen und Pipeline starten
-
-Nachdem du den ACR-Namen in der Pipeline-Datei eingesetzt hast, committe und
-pushe:
+Committe alle Dateien und pushe:
 
 ```bash
-git add azure-pipelines.yml
+git add index.html Dockerfile .dockerignore azure-pipelines.yml
 git commit -m "Add ACI deployment pipeline"
-git push origin master
+git push origin main
 ```
 
-Beim ersten Lauf mit der Service Connection und dem Environment muss die Nutzung
+Erstelle anschließend die Pipeline in Azure DevOps:
+
+1. Gehe zu **Pipelines > New pipeline**.
+2. Wähle **"Azure Repos Git"**.
+3. Wähle das Repository **"aci-demo"**.
+4. Wähle **"Existing Azure Pipelines YAML file"** und wähle
+   `/azure-pipelines.yml`.
+5. Klicke auf **"Run"**.
+
+Beim ersten Lauf mit den Service Connections und dem Environment muss die Nutzung
 möglicherweise einmalig genehmigt werden. Öffne den Pipeline-Run im Browser -
 du siehst eine Meldung wie *"This pipeline needs permission to access a resource
 before this run can continue"*. Klicke auf **"View"** und dann auf
 **"Permit"**.
 
-### Schritt 3: Container im Browser prüfen
+### Schritt 7: Container im Browser prüfen
 
 Nach erfolgreichem Deployment findest du den FQDN (Fully Qualified Domain Name)
 des Containers im Log der Deploy- oder Verify-Stage. Du kannst ihn auch
@@ -257,8 +354,16 @@ manuell abfragen:
 **Bash:**
 
 ```bash
+# Projektnamen wie in der Pipeline normalisieren
+PROJECT_NAME="<dein-azure-devops-projekt>"
+PROJECT_SLUG=$(echo "$PROJECT_NAME" \
+  | tr '[:upper:]' '[:lower:]' \
+  | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')
+PROJECT_SLUG="${PROJECT_SLUG:0:20}"
+CONTAINER_NAME="aci-demo-${PROJECT_SLUG}"
+
 az container show \
-  --name hello-pipeline-aci \
+  --name "$CONTAINER_NAME" \
   --resource-group rg-pipeline-training \
   --query "ipAddress.fqdn" -o tsv
 ```
@@ -266,14 +371,19 @@ az container show \
 **PowerShell:**
 
 ```powershell
+$ProjectName = "<dein-azure-devops-projekt>"
+$ProjectSlug = (($ProjectName.ToLower() -replace '[^a-z0-9]+','-').Trim('-'))
+$ProjectSlug = $ProjectSlug.Substring(0, [Math]::Min(20, $ProjectSlug.Length))
+$ContainerName = "aci-demo-$ProjectSlug"
+
 az container show `
-  --name hello-pipeline-aci `
+  --name $ContainerName `
   --resource-group rg-pipeline-training `
   --query "ipAddress.fqdn" -o tsv
 ```
 
-Öffne `http://<fqdn>` im Browser - du solltest die nginx-Willkommensseite aus
-dem Docker-Image sehen.
+Öffne `http://<fqdn>` im Browser - du solltest die HTML-Seite mit "Hello from
+Azure Container Instances!" sehen.
 
 Im **Azure Portal** kannst du unter **Container Instances** deinen Container
 inspizieren:
@@ -284,27 +394,46 @@ inspizieren:
 
 ## Aufräumen
 
-Der ACI-Container verursacht laufende Kosten, solange er läuft. Lösche ihn nach
-dem Lab:
+Der ACI-Container verursacht laufende Kosten, solange er läuft. Lösche ihn und
+die ACR nach dem Lab:
 
 **Bash:**
 
 ```bash
+PROJECT_NAME="<dein-azure-devops-projekt>"
+PROJECT_SLUG=$(echo "$PROJECT_NAME" \
+  | tr '[:upper:]' '[:lower:]' \
+  | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')
+PROJECT_SLUG="${PROJECT_SLUG:0:20}"
+CONTAINER_NAME="aci-demo-${PROJECT_SLUG}"
+
+# Container löschen
 az container delete \
-  --name hello-pipeline-aci \
+  --name "$CONTAINER_NAME" \
   --resource-group rg-pipeline-training \
   --yes
+
+# ACR löschen
+az acr delete --name <dein-acr-name> --resource-group rg-pipeline-training --yes
 ```
 
 **PowerShell:**
 
 ```powershell
+$ProjectName = "<dein-azure-devops-projekt>"
+$ProjectSlug = (($ProjectName.ToLower() -replace '[^a-z0-9]+','-').Trim('-'))
+$ProjectSlug = $ProjectSlug.Substring(0, [Math]::Min(20, $ProjectSlug.Length))
+$ContainerName = "aci-demo-$ProjectSlug"
+
+# Container löschen
 az container delete `
-  --name hello-pipeline-aci `
+  --name $ContainerName `
   --resource-group rg-pipeline-training `
   --yes
+
+# ACR löschen
+az acr delete --name <dein-acr-name> --resource-group rg-pipeline-training --yes
 ```
 
-Die ACR kann bestehen bleiben, falls du weitere Labs mit Docker-Images planst.
-Falls du sie nicht mehr benötigst, kannst du sie löschen (siehe Lab 08,
-Aufräumen).
+Die Service Connection `acr-aci-connection` kannst du unter **Project Settings >
+Service connections** ebenfalls löschen.
