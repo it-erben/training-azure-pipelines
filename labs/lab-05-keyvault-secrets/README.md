@@ -295,35 +295,3 @@ Beachte im Build-Log: Überall dort, wo ein Secret-Wert in der Ausgabe erscheine
 würde, zeigt Azure Pipelines stattdessen `***`. Diese Maskierung greift
 automatisch für alle Variablen, die aus einer Key-Vault-verknüpften Variable
 Group stammen. Du musst dafür nichts extra konfigurieren.
-
-## Aufräumen
-
-Der Key Vault und der Service Principal werden vom Trainer per Terraform
-verwaltet und müssen nicht manuell gelöscht werden. Lösche nur die Ressourcen,
-die du in diesem Lab selbst erstellt hast:
-
-**Bash:**
-
-```bash
-# Service Connection löschen
-SC_ID=$(az devops service-endpoint list --output json | \
-  jq -r '.[] | select(.name == "azure-training-connection") | .id')
-az devops service-endpoint delete --id "$SC_ID" --yes
-
-# Variable Group "keyvault-secrets" in Azure DevOps löschen.
-GROUP_ID=$(az pipelines variable-group list --query "[?name=='keyvault-secrets'].id" -o tsv)
-az pipelines variable-group delete --group-id $GROUP_ID --yes
-```
-
-**PowerShell:**
-
-```powershell
-# Service Connection löschen
-$SC_ID = (az devops service-endpoint list --output json |
-  jq -r '.[] | select(.name == "azure-training-connection") | .id')
-az devops service-endpoint delete --id "$SC_ID" --yes
-
-# Variable Group "keyvault-secrets" in Azure DevOps löschen.
-$GROUP_ID = (az pipelines variable-group list --query "[?name=='keyvault-secrets'].id" -o tsv)
-az pipelines variable-group delete --group-id $GROUP_ID --yes
-```
