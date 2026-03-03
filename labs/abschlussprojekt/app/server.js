@@ -64,7 +64,7 @@ const server = http.createServer((req, res) => {
 // Server nur starten, wenn direkt ausgeführt (nicht bei require in Tests)
 if (require.main === module) {
     server.listen(port, () => {
-        console.log(`Server running on port ${port}`);
+        console.log(`Server running`);
     });
 }
 

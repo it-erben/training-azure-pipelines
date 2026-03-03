@@ -299,33 +299,6 @@ stages:
               echo "  - Interne CLI-Tools"
               echo "  - VPN-Clients"
             displayName: 'Custom-Tools'
-
-  # ===== Vergleich =====
-  - stage: Compare
-    displayName: 'Vergleich'
-    dependsOn:
-      - HostedBuild
-      - SelfHostedBuild
-    jobs:
-      - job: CompareResults
-        pool:
-          vmImage: 'ubuntu-latest'
-        steps:
-          - script: |
-              echo "=== Agent-Vergleich ==="
-              echo ""
-              echo "+------------------------+-------------------+-------------------+"
-              echo "| Eigenschaft            | Microsoft-hosted  | Self-hosted       |"
-              echo "+------------------------+-------------------+-------------------+"
-              echo "| Setup                  | Kein Setup        | Manuell           |"
-              echo "| Wartung                | Automatisch       | Eigene Verwaltung |"
-              echo "| Kosten                 | Pro Minute        | Eigene Infra      |"
-              echo "| Skalierung             | Automatisch       | Manuell           |"
-              echo "| Build-Cache            | Nein (neu pro Run)| Ja (persistent)   |"
-              echo "| Netzwerk               | Öffentlich        | Anpassbar         |"
-              echo "| Spezial-Software       | Begrenzt          | Unbegrenzt        |"
-              echo "+------------------------+-------------------+-------------------+"
-            displayName: 'Vergleichstabelle'
 ```
 
 Gehe die Pipeline Abschnitt für Abschnitt durch:
@@ -341,9 +314,6 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
   der HostedBuild-Stage, sodass beide **parallel** laufen. Der Step gibt
   dieselben Agent-Informationen aus — hier siehst du den Namen deines
   Rechners und die lokal installierten Tools.
-- **Compare-Stage**: Wartet auf beide vorherigen Stages (`dependsOn` mit zwei
-  Einträgen) und gibt eine Vergleichstabelle aus. Sie läuft auf einem Hosted
-  Agent, da sie keine spezielle Software braucht.
 
 ### Schritt 8: Committen und Pipeline beobachten
 

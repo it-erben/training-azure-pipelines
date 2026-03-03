@@ -25,26 +25,11 @@ Im Verzeichnis `app/` findest du ein fertiges **Team Status Dashboard** — eine
 Node.js-Webanwendung mit einem `/health`-Endpoint, einer `/api/info`-Route und
 einem visuellen Dashboard.
 
-Kopiere das gesamte `app/`-Verzeichnis in dein `hello-pipeline`-Repository:
+Kopiere das gesamte `app/`-Verzeichnis in dein `hello-pipeline`-Repository.
 
-**Bash:**
-
-```bash
-# Aus dem Schulungsmaterial kopieren
-cp -r app/ ~/hello-pipeline/app/
-```
-
-**PowerShell:**
-
-```powershell
-# Aus dem Schulungsmaterial kopieren
-Copy-Item -Recurse -Path app -Destination $HOME/hello-pipeline/app
-```
-
-Teste die App lokal:
+Teste die App dann lokal:
 
 ```bash
-cd ~/hello-pipeline/app
 npm test
 ```
 
@@ -52,7 +37,6 @@ Alle Tests sollten grün sein. Optional kannst du auch den Docker-Build lokal
 testen:
 
 ```bash
-cd ~/hello-pipeline/app
 docker build -t team-dashboard .
 docker run -p 8080:80 team-dashboard
 # Öffne http://localhost:8080 im Browser
@@ -63,16 +47,16 @@ docker run -p 8080:80 team-dashboard
 Schreibe eine `azure-pipelines.yml` im Root deines `hello-pipeline`-Repositorys,
 die folgende Anforderungen erfüllt:
 
-| Nr | Anforderung | Hinweis | Pflicht |
-|----|-------------|---------|---------|
-| 1 | Pipeline triggert bei Push auf `master` | Lab 02 | Ja |
-| 2 | Tests laufen in einer eigenen Stage | Lab 06 | Ja |
-| 3 | Docker-Image wird gebaut und in die ACR gepusht | Lab 08 | Ja |
-| 4 | Deployment auf ACI über einen Deployment Job mit Environment `dev` | Lab 11 | Ja |
-| 5 | Health Check nach dem Deployment (HTTP-Request auf `/health`) | Lab 13 | Ja |
-| 6 | Mindestens eine Variable kommt aus einer Variable Group | Lab 04 | Ja |
-| 7 | Approval Gate vor einer `production`-Stage | Lab 12 | Bonus |
-| 8 | Wiederverwendbares Template (z. B. für den Health Check) | Lab 20 | Bonus |
+| Nr | Anforderung                                                        | Hinweis | Pflicht |
+|----|--------------------------------------------------------------------|---------|---------|
+| 1  | Pipeline triggert bei Push auf `master`                            | Lab 02  | Ja      |
+| 2  | Tests laufen in einer eigenen Stage                                | Lab 06  | Ja      |
+| 3  | Docker-Image wird gebaut und in die ACR gepusht                    | Lab 08  | Ja      |
+| 4  | Deployment auf ACI über einen Deployment Job mit Environment `dev` | Lab 11  | Ja      |
+| 5  | Health Check nach dem Deployment (HTTP-Request auf `/health`)      | Lab 13  | Ja      |
+| 6  | Mindestens eine Variable kommt aus einer Variable Group            | Lab 04  | Ja      |
+| 7  | Approval Gate vor einer `production`-Stage                         | Lab 12  | Bonus   |
+| 8  | Wiederverwendbares Template (z. B. für den Health Check)           | Lab 20  | Bonus   |
 
 ### Details zu den Anforderungen
 
@@ -167,22 +151,3 @@ Die Musterlösung findest du unter
 [`loesung/azure-pipelines.yml`](loesung/azure-pipelines.yml). Sie enthält auch
 ein Health-Check-Template unter
 [`loesung/templates/health-check.yml`](loesung/templates/health-check.yml).
-
-## Aufräumen
-
-Nach dem Abschlussprojekt solltest du die ACI-Container löschen, da sie
-laufende Kosten verursachen:
-
-**Bash:**
-
-```bash
-az container delete --resource-group rg-pipeline-training --name dashboard-dev-<teilnehmernr> --yes
-az container delete --resource-group rg-pipeline-training --name dashboard-prod-<teilnehmernr> --yes
-```
-
-**PowerShell:**
-
-```powershell
-az container delete --resource-group rg-pipeline-training --name dashboard-dev-<teilnehmernr> --yes
-az container delete --resource-group rg-pipeline-training --name dashboard-prod-<teilnehmernr> --yes
-```
