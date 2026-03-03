@@ -146,7 +146,6 @@ Connection** in Azure DevOps:
 9. Setze den Haken bei **"Grant access permission to all pipelines"**.
 10. Klicke auf **"Save"**.
 
-
 ### Schritt 5: Pipeline mit Build und ACI-Deployment
 
 Wir erstellen eine Pipeline mit drei Stages: **Build** baut das Docker-Image und
