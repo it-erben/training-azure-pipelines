@@ -183,13 +183,36 @@ stages:
         pool:
           vmImage: 'ubuntu-latest'
         steps:
+          # ACR-Login für den Cache-Pull
           - task: Docker@2
-            displayName: 'Docker Build and Push'
+            displayName: 'ACR Login'
+            inputs:
+              containerRegistry: 'acr-aci-connection'
+              command: 'login'
+
+          # Vorheriges Image als Cache-Quelle pullen
+          - script: |
+              docker pull $(acrLoginServer)/$(imageName):latest || true
+            displayName: 'Cache: Vorheriges Image pullen'
+
+          - task: Docker@2
+            displayName: 'Docker Build'
             inputs:
               containerRegistry: 'acr-aci-connection'
               repository: '$(imageName)'
-              command: 'buildAndPush'
+              command: 'build'
               Dockerfile: '**/Dockerfile'
+              arguments: '--cache-from=$(acrLoginServer)/$(imageName):latest'
+              tags: |
+                $(imageTag)
+                latest
+
+          - task: Docker@2
+            displayName: 'Docker Push'
+            inputs:
+              containerRegistry: 'acr-aci-connection'
+              repository: '$(imageName)'
+              command: 'push'
               tags: |
                 $(imageTag)
                 latest
