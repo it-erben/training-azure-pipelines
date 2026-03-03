@@ -22,7 +22,7 @@ Vorteile gegenüber ARM-Templates:
   tief verschachtelten Strukturen. Bicep reduziert den Code typischerweise um
   50-70%.
 - **Automatische Abhängigkeitserkennung**: Wenn eine Ressource eine andere
-  referenziert (z. B. `storageAccount.name`), erkennt Bicep die Abhängigkeit
+  referenziert (z. B. `appServicePlan.id`), erkennt Bicep die Abhängigkeit
   automatisch und erstellt die Ressourcen in der richtigen Reihenfolge. In
   ARM-Templates müsste man `dependsOn` manuell pflegen.
 - **Modulare Struktur**: Bicep unterstützt Module, mit denen du Templates
@@ -43,9 +43,8 @@ Bicep vs. Terraform — wann was?
 | Lernkurve                | Gering (Azure-nah)             | Mittel (eigene HCL-Sprache)   |
 | Ökosystem                | Azure-Module                   | Riesiges Provider-Ökosystem   |
 
-In diesem Lab erstellen wir ein Bicep-Template für einen Storage Account mit
-File Share und deployen es über eine Pipeline mit Validate-, What-If- und
-Deploy-Stages.
+In diesem Lab erstellen wir ein Bicep-Template für einen App Service und
+deployen es über eine Pipeline mit Validate-, What-If- und Deploy-Stages.
 
 ## Voraussetzungen
 
@@ -62,14 +61,15 @@ Erstelle ein `bicep/`-Verzeichnis im Repository:
 mkdir -p bicep
 ```
 
-Erstelle die Datei **bicep/main.bicep** — das Haupt-Template, das einen Storage
-Account und einen File Share definiert. Bicep-Dateien verwenden eine deklarative
-Syntax, die deutlich kompakter ist als das JSON-Äquivalent in ARM-Templates:
+Erstelle die Datei **bicep/main.bicep** — das Haupt-Template, das einen App
+Service Plan und eine Web App definiert. Bicep-Dateien verwenden eine
+deklarative Syntax, die deutlich kompakter ist als das JSON-Äquivalent in
+ARM-Templates:
 
 ```bicep
 // Parameter
 @description('Name des Projekts')
-param projectName string = 'training'
+param projectName string = 'training-app'
 
 @description('Umgebung')
 @allowed(['dev', 'staging', 'production'])
@@ -78,87 +78,88 @@ param environment string = 'dev'
 @description('Azure-Region')
 param location string = resourceGroup().location
 
-@description('Eindeutiger Suffix (nur Kleinbuchstaben und Zahlen)')
-@minLength(2)
-@maxLength(6)
+@description('Eindeutiger Suffix')
 param uniqueSuffix string
 
-@description('Quota des File Shares in GB')
-param shareQuotaGb int = 1
+@description('App-Version')
+param appVersion string = '1.0.0'
 
 // Variablen
-var storageAccountName = 'st${projectName}${environment}${uniqueSuffix}'
-var fileShareName = 'share-${projectName}-${environment}'
+var appServicePlanName = 'plan-${projectName}-${environment}'
+var webAppName = '${projectName}-${environment}-${uniqueSuffix}'
 var tags = {
   Environment: environment
   Project: projectName
   ManagedBy: 'bicep'
 }
 
-// Storage Account
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
-  name: storageAccountName
+// App Service Plan
+resource appServicePlan 'Microsoft.Web/serverfarms@2023-01-01' = {
+  name: appServicePlanName
   location: location
   tags: tags
   sku: {
-    name: 'Standard_LRS'
+    name: 'F1'
+    tier: 'Free'
   }
-  kind: 'StorageV2'
+  kind: 'linux'
   properties: {
-    minimumTlsVersion: 'TLS1_2'
-    allowBlobPublicAccess: false
+    reserved: true  // Für Linux erforderlich
   }
 }
 
-// File Service (implizite Abhängigkeit zum Storage Account)
-resource fileService 'Microsoft.Storage/storageAccounts/fileServices@2023-01-01' = {
-  parent: storageAccount
-  name: 'default'
-}
-
-// File Share
-resource fileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-01-01' = {
-  parent: fileService
-  name: fileShareName
+// Web App
+resource webApp 'Microsoft.Web/sites@2023-01-01' = {
+  name: webAppName
+  location: location
+  tags: tags
   properties: {
-    shareQuota: shareQuotaGb
+    serverFarmId: appServicePlan.id
+    siteConfig: {
+      linuxFxVersion: 'NODE|20-lts'
+      appSettings: [
+        {
+          name: 'ENVIRONMENT'
+          value: environment
+        }
+        {
+          name: 'APP_VERSION'
+          value: appVersion
+        }
+      ]
+    }
   }
 }
 
 // Outputs
-output storageAccountName string = storageAccount.name
-output fileShareName string = fileShare.name
-output storageAccountId string = storageAccount.id
-output primaryEndpoint string = storageAccount.properties.primaryEndpoints.file
+output webAppName string = webApp.name
+output webAppUrl string = 'https://${webApp.properties.defaultHostName}'
+output appServicePlanName string = appServicePlan.name
 ```
 
 Gehe das Template Abschnitt für Abschnitt durch:
 
 - **Parameter** (`param`): Definieren die Eingabewerte des Templates. Der
   Decorator `@description` fügt eine Beschreibung hinzu, `@allowed` schränkt
-  die erlaubten Werte ein. `@minLength` und `@maxLength` validieren die Länge.
-  Parameter mit Default-Wert (z. B. `projectName string = 'training'`) sind
-  optional, Parameter ohne Default (z. B. `uniqueSuffix string`) müssen beim
-  Deployment übergeben werden.
+  die erlaubten Werte ein. Parameter mit Default-Wert (z. B.
+  `projectName string = 'training-app'`) sind optional, Parameter ohne Default
+  (z. B. `uniqueSuffix string`) müssen beim Deployment übergeben werden.
 - **Variablen** (`var`): Berechnete Werte, die aus Parametern zusammengesetzt
   werden. String-Interpolation funktioniert mit `${...}` — ähnlich wie in
   JavaScript Template Literals. Die `tags`-Variable definiert ein Objekt, das
   allen Ressourcen zugewiesen wird, um sie als Bicep-verwaltet zu markieren.
-  Der Storage-Account-Name wird aus Projekt, Umgebung und Suffix zusammengesetzt
-  und darf nur Kleinbuchstaben und Zahlen enthalten (Azure-Vorgabe).
-- **Storage Account** (`resource`): Beachte die Syntax:
-  `resource <symbolischer-Name> '<Typ>@<API-Version>'`. Der symbolische Name
-  (`storageAccount`) wird nur innerhalb der Bicep-Datei verwendet, um auf die
-  Ressource zu verweisen. `Standard_LRS` ist die günstigste Redundanz-Option
-  (lokal redundant). `allowBlobPublicAccess: false` ist eine
-  Security-Best-Practice.
-- **File Service und File Share**: Der File Share ist eine Unter-Ressource des
-  Storage Accounts. Bicep bildet das über das `parent`-Keyword ab: Der File
-  Service referenziert `storageAccount` als Parent, der File Share referenziert
-  `fileService`. Bicep erkennt diese Abhängigkeitskette automatisch und erstellt
-  die Ressourcen in der richtigen Reihenfolge — ohne explizites `dependsOn`.
-- **Outputs** (`output`): Werte, die nach dem Deployment angezeigt werden. Der
-  Primary Endpoint ist die URL, unter der der File Share erreichbar ist.
+- **App Service Plan** (`resource`): Definiert den Hosting-Plan. Beachte die
+  Syntax: `resource <symbolischer-Name> '<Typ>@<API-Version>'`. Der
+  symbolische Name (`appServicePlan`) wird nur innerhalb der Bicep-Datei
+  verwendet, um auf die Ressource zu verweisen. `reserved: true` ist für
+  Linux-Pläne erforderlich.
+- **Web App**: Referenziert den App Service Plan über `appServicePlan.id`.
+  Bicep erkennt diese Referenz automatisch und erstellt den Plan vor der
+  Web App — ohne explizites `dependsOn`. Die `appSettings` konfigurieren
+  Umgebungsvariablen, die die Anwendung zur Laufzeit lesen kann.
+- **Outputs** (`output`): Werte, die nach dem Deployment angezeigt werden. Die
+  URL wird aus der automatisch generierten Property `defaultHostName`
+  zusammengesetzt.
 
 Erstelle die Datei **bicep/dev.parameters.json** — die Parameter-Datei für die
 Dev-Umgebung. Parameter-Dateien verwenden das ARM-Template-Format (JSON) und
@@ -171,7 +172,7 @@ zu ändern:
   "contentVersion": "1.0.0.0",
   "parameters": {
     "projectName": {
-      "value": "training"
+      "value": "training-app"
     },
     "environment": {
       "value": "dev"
@@ -184,9 +185,8 @@ zu ändern:
 ```
 
 Der Parameter `uniqueSuffix` muss vor dem Deployment mit deinem persönlichen
-Kürzel ersetzt werden (nur Kleinbuchstaben und Zahlen, 2-6 Zeichen). In der
-Pipeline überschreiben wir ihn per CLI-Parameter, sodass die Datei primär für
-lokale Tests dient.
+Kürzel ersetzt werden. In der Pipeline überschreiben wir ihn per
+CLI-Parameter, sodass die Datei primär für lokale Tests dient.
 
 ### Schritt 2: Bicep lokal validieren (optional)
 
@@ -225,8 +225,8 @@ az deployment group what-if `
 
 Die Ausgabe von `what-if` zeigt farbcodiert an, welche Ressourcen erstellt
 (`+`), geändert (`~`) oder gelöscht (`-`) werden. Bei einem frischen
-Deployment siehst du drei `Create`-Einträge: einen Storage Account, einen File
-Service und einen File Share.
+Deployment siehst du zwei `Create`-Einträge: einen App Service Plan und eine
+Web App.
 
 ### Schritt 3: Pipeline mit Bicep Deployment
 
@@ -240,8 +240,7 @@ IaC-Workflow abbilden:
 4. **Verify**: Prüft, ob die Ressourcen tatsächlich erstellt wurden.
 
 Ersetze den Inhalt von `azure-pipelines.yml`. **Wichtig**: Ersetze den
-Platzhalter `<dein-kürzel>` mit deinem persönlichen Kürzel (nur
-Kleinbuchstaben und Zahlen, 2-6 Zeichen):
+Platzhalter `<dein-kürzel>` mit deinem persönlichen Kürzel:
 
 ```yaml
 trigger:
@@ -288,7 +287,8 @@ stages:
                   --resource-group $(resourceGroup) \
                   --template-file bicep/main.bicep \
                   --parameters bicep/dev.parameters.json \
-                  --parameters uniqueSuffix=$(uniqueSuffix)
+                  --parameters uniqueSuffix=$(uniqueSuffix) \
+                  --parameters appVersion=1.0.$(Build.BuildId)
 
                 echo "Validation erfolgreich!"
 
@@ -317,6 +317,7 @@ stages:
                   --template-file bicep/main.bicep \
                   --parameters bicep/dev.parameters.json \
                   --parameters uniqueSuffix=$(uniqueSuffix) \
+                  --parameters appVersion=1.0.$(Build.BuildId) \
                   --no-pretty-print
 
   # ===== Deploy =====
@@ -348,11 +349,16 @@ stages:
                         --template-file bicep/main.bicep \
                         --parameters bicep/dev.parameters.json \
                         --parameters uniqueSuffix=$(uniqueSuffix) \
+                        --parameters appVersion=1.0.$(Build.BuildId) \
                         --output json)
 
                       echo ""
                       echo "=== Deployment Outputs ==="
                       echo $RESULT | jq '.properties.outputs'
+
+                      echo ""
+                      WEB_APP_URL=$(echo $RESULT | jq -r '.properties.outputs.webAppUrl.value')
+                      echo "Web App URL: $WEB_APP_URL"
 
   # ===== Verify =====
   - stage: Verify
@@ -377,21 +383,6 @@ stages:
                   --output table
 
                 echo ""
-                echo "=== Storage Account Details ==="
-                az storage account show \
-                  --name "sttrainingdev$(uniqueSuffix)" \
-                  --resource-group $(resourceGroup) \
-                  --query "{name:name, location:location, sku:sku.name, kind:kind}" \
-                  --output table
-
-                echo ""
-                echo "=== File Shares ==="
-                az storage share-rm list \
-                  --storage-account "sttrainingdev$(uniqueSuffix)" \
-                  --resource-group $(resourceGroup) \
-                  --output table
-
-                echo ""
                 echo "=== Deployment-Historie ==="
                 az deployment group list \
                   --resource-group $(resourceGroup) \
@@ -406,9 +397,9 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
 - **Validate-Stage**: Führt zwei Prüfungen durch. `az bicep build` kompiliert
   das Template zu ARM-JSON und meldet Syntaxfehler — das funktioniert ohne
   Azure-Verbindung. `az deployment group validate` prüft zusätzlich gegen die
-  Azure-API: existiert die Resource Group? Sind die Parameter gültig? Ist der
-  Storage-Account-Name noch verfügbar? Diese Preflight-Validierung fängt Fehler
-  ab, bevor Ressourcen erstellt werden.
+  Azure-API: existiert die Resource Group? Sind die Parameter gültig? Ist die
+  SKU in der Region verfügbar? Diese Preflight-Validierung fängt Fehler ab,
+  bevor Ressourcen erstellt werden.
 - **What-If-Stage**: Zeigt eine Vorschau der Änderungen — welche Ressourcen
   werden erstellt, geändert oder gelöscht? Das ist das Bicep-Äquivalent zu
   `terraform plan`. In der Praxis würde man hier ein Approval Gate einbauen,
@@ -417,26 +408,26 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
 - **Deploy-Stage**: Führt das eigentliche Deployment durch. Als Deployment Job
   mit `environment: 'dev'` kann ein Approval Gate konfiguriert werden (Lab 12).
   `checkout: self` ist nötig, weil Deployment Jobs standardmäßig keinen
-  Checkout des Repositorys durchführen. Die Outputs des Deployments (Storage-
-  Account-Name, File-Share-Name, Endpoint) werden per `jq` aus der
-  JSON-Antwort extrahiert und im Log angezeigt.
+  Checkout des Repositorys durchführen. Die Outputs des Deployments (Web-App-
+  Name, URL) werden per `jq` aus der JSON-Antwort extrahiert und im Log
+  angezeigt.
 - **Verify-Stage**: Prüft per Azure CLI, ob die Ressourcen mit dem Tag
-  `ManagedBy=bicep` tatsächlich erstellt wurden, zeigt die Details des Storage
-  Accounts und des File Shares, und listet die Deployment-Historie auf.
+  `ManagedBy=bicep` tatsächlich erstellt wurden, und zeigt die
+  Deployment-Historie an. In der Praxis könnte man hier auch einen Health Check
+  gegen die Web App ausführen.
 
 ### Schritt 4: Platzhalter ersetzen, committen und starten
 
 Ersetze den Platzhalter in der Pipeline-Datei und in der Parameter-Datei mit
-deinem persönlichen Kürzel (nur Kleinbuchstaben und Zahlen, 2-6 Zeichen):
+deinem persönlichen Kürzel:
 
 **Bash:**
 
 ```bash
 # Platzhalter in Pipeline und Parameter-Datei ersetzen
 SUFFIX=$(whoami | head -c 3)
-sed -i.bak "s/<dein-kürzel>/$SUFFIX/g" azure-pipelines.yml
-sed -i.bak "s/REPLACE_WITH_YOUR_SUFFIX/$SUFFIX/g" bicep/dev.parameters.json
-rm -f azure-pipelines.yml.bak bicep/dev.parameters.json.bak
+sed -i "s/<dein-kürzel>/$SUFFIX/g" azure-pipelines.yml
+sed -i "s/REPLACE_WITH_YOUR_SUFFIX/$SUFFIX/g" bicep/dev.parameters.json
 ```
 
 **PowerShell:**
@@ -458,10 +449,10 @@ Beobachte den Pipeline-Run im Browser. Die vier Stages laufen nacheinander:
 
 1. **Validate** prüft Syntax und Preflight — sollte in wenigen Sekunden
    durchlaufen.
-2. **What-If** zeigt die geplanten Änderungen: `3 to create` (Storage Account,
-   File Service, File Share).
+2. **What-If** zeigt die geplanten Änderungen: `2 to create` (App Service Plan
+   und Web App).
 3. **Deploy** erstellt die Ressourcen und gibt die Outputs aus.
-4. **Verify** listet die erstellten Ressourcen und den File Share.
+4. **Verify** listet die erstellten Ressourcen.
 
 ## Validierung
 
@@ -478,12 +469,6 @@ az resource list \
   --resource-group rg-pipeline-training \
   --query "[?tags.ManagedBy=='bicep']" \
   --output table
-
-# File Share prüfen
-az storage share-rm list \
-  --storage-account sttrainingdev<dein-kürzel> \
-  --resource-group rg-pipeline-training \
-  --output table
 ```
 
 **PowerShell:**
@@ -497,41 +482,33 @@ az resource list `
   --resource-group rg-pipeline-training `
   --query "[?tags.ManagedBy=='bicep']" `
   --output table
-
-# File Share prüfen
-az storage share-rm list `
-  --storage-account sttrainingdev<dein-kürzel> `
-  --resource-group rg-pipeline-training `
-  --output table
 ```
 
 Öffne im Browser das Build-Log und prüfe:
 
 - Die **Validate-Stage** zeigt `Syntax OK!` und `Validation erfolgreich!`.
 - Die **What-If-Stage** zeigt die geplanten Änderungen mit `Create`-Markierung.
-- Die **Deploy-Stage** zeigt die Outputs mit Storage-Account-Name und Endpoint.
+- Die **Deploy-Stage** zeigt die Outputs mit Web-App-Name und URL.
 - Die **Verify-Stage** listet die erstellten Ressourcen mit dem Tag
-  `ManagedBy=bicep` und zeigt den File Share.
+  `ManagedBy=bicep`.
 
 ## Erwartetes Ergebnis
 
 **What-If Output:**
 
 ```
-Resource changes: 3 to create
-  + Microsoft.Storage/storageAccounts             sttrainingdevmmu
-  + Microsoft.Storage/storageAccounts/fileServices sttrainingdevmmu/default
-  + Microsoft.Storage/storageAccounts/.../shares   share-training-dev
+Resource changes: 2 to create
+  + Microsoft.Web/serverfarms  plan-training-app-dev
+  + Microsoft.Web/sites        training-app-dev-mmu
 ```
 
 **Deployment Output:**
 
-```json
+```
 {
-  "storageAccountName": { "value": "sttrainingdevmmu" },
-  "fileShareName": { "value": "share-training-dev" },
-  "storageAccountId": { "value": "/subscriptions/.../sttrainingdevmmu" },
-  "primaryEndpoint": { "value": "https://sttrainingdevmmu.file.core.windows.net/" }
+  "webAppName": { "value": "training-app-dev-mmu" },
+  "webAppUrl": { "value": "https://training-app-dev-mmu.azurewebsites.net" },
+  "appServicePlanName": { "value": "plan-training-app-dev" }
 }
 ```
 
@@ -541,37 +518,38 @@ Resource changes: 3 to create
 
 ```bash
 # Alle mit Bicep erstellten Ressourcen löschen
-az storage account delete \
-  --name sttrainingdev<dein-kürzel> \
+az resource list \
   --resource-group rg-pipeline-training \
-  --yes
+  --query "[?tags.ManagedBy=='bicep'].id" -o tsv | \
+  xargs -I {} az resource delete --ids {}
+
+# Oder die gesamte Ressourcengruppe, wenn sie nur Bicep-Ressourcen enthält
+# az group delete --name rg-training-app-dev --yes
 ```
 
 **PowerShell:**
 
 ```powershell
 # Alle mit Bicep erstellten Ressourcen löschen
-az storage account delete `
-  --name sttrainingdev<dein-kürzel> `
+az resource list `
   --resource-group rg-pipeline-training `
-  --yes
-```
+  --query "[?tags.ManagedBy=='bicep'].id" -o tsv |
+  ForEach-Object { az resource delete --ids $_ }
 
-Beim Löschen des Storage Accounts werden auch alle enthaltenen File Shares
-automatisch mit gelöscht.
+# Oder die gesamte Ressourcengruppe, wenn sie nur Bicep-Ressourcen enthält
+# az group delete --name rg-training-app-dev --yes
+```
 
 ## Tipps und Troubleshooting
 
 - **"Bicep not found"**: Bicep ist seit Azure CLI 2.20 integriert. Update mit
   `az upgrade`. Auf Microsoft-hosted Agents ist Bicep immer verfügbar.
-- **"StorageAccountAlreadyTaken"**: Storage-Account-Namen müssen global
-  eindeutig sein. Wähle ein anderes Suffix.
 - **What-If zeigt "NoChange"**: Die Ressourcen existieren bereits im
   gewünschten Zustand. Das ist das erwartete Verhalten bei einem
   erneuten Lauf ohne Code-Änderungen.
 - **Parameter-Reihenfolge**: CLI-Parameter (`--parameters uniqueSuffix=...`)
-  überschreiben Werte aus der Parameter-Datei. So kannst du Werte dynamisch
-  setzen, ohne die Datei zu ändern.
+  überschreiben Werte aus der Parameter-Datei. So kannst du die Build-Nummer
+  dynamisch setzen, ohne die Datei zu ändern.
 - **Bicep vs. Terraform**: Bicep ist Azure-nativ und braucht kein
   State-Management — Azure selbst ist der State. Terraform ist
   Cloud-agnostisch und hat ein größeres Ökosystem. Für reine Azure-Projekte
