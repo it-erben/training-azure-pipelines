@@ -2,11 +2,11 @@
 
 ## Hintergrund
 
-Traditionell wird Security erst am Ende des Entwicklungsprozesses geprüft —
+Traditionell wird Security erst am Ende des Entwicklungsprozesses geprüft -
 kurz vor dem Release führt ein Security-Team einen Penetrationstest durch.
 Das Ergebnis: teure Nacharbeit, verzögerte Releases und frustrierte
 Entwickler. **Shift Left Security** dreht diesen Ansatz um: Security-Prüfungen
-werden so früh wie möglich in den Entwicklungsprozess integriert — idealerweise
+werden so früh wie möglich in den Entwicklungsprozess integriert - idealerweise
 in jede Pipeline und jeden Pull Request.
 
 Die wichtigsten Scanning-Typen in CI/CD-Pipelines:
@@ -54,10 +54,10 @@ Schweregrad.
 
 Damit die Security-Scanner etwas finden, erstellen wir eine Datei mit
 typischen Sicherheitslücken. **Dieser Code dient ausschließlich der
-Demonstration** — in einem echten Projekt gehören solche Muster natürlich
+Demonstration** - in einem echten Projekt gehören solche Muster natürlich
 nicht in den Code.
 
-Erstelle die Datei **src/vulnerable-demo.js** — eine Sammlung der häufigsten
+Erstelle die Datei **src/vulnerable-demo.js** - eine Sammlung der häufigsten
 Sicherheitslücken aus den OWASP Top 10:
 
 ```javascript
@@ -121,7 +121,7 @@ Gehe die fünf Sicherheitslücken durch:
   Dateipfad nicht. Ein Angreifer könnte `../../../etc/passwd` eingeben und
   damit beliebige Dateien lesen.
 
-Ersetze außerdem den Inhalt von **package.json** — mit einer absichtlich
+Ersetze außerdem den Inhalt von **package.json** - mit einer absichtlich
 verwundbaren Abhängigkeit (`lodash 4.17.20` hat bekannte CVEs):
 
 ```json
@@ -153,9 +153,9 @@ wird. Die aktuelle Version `4.17.21` behebt diese Schwachstelle.
 
 ### Schritt 2: Pipeline mit Security Scanning
 
-Jetzt erstellen wir eine Pipeline mit drei parallelen Security-Scans und
-einer anschließenden Report-Stage. Die Scans laufen parallel, um Zeit zu
-sparen — jeder prüft einen anderen Aspekt der Sicherheit.
+Jetzt erstellen wir eine Pipeline mit drei parallelen Security-Scans.
+Die Scans laufen parallel, um Zeit zu sparen - jeder prüft einen
+anderen Aspekt der Sicherheit.
 
 Ersetze den Inhalt von `azure-pipelines.yml`:
 
@@ -327,51 +327,7 @@ stages:
             displayName: 'SAST Analyse'
             continueOnError: true
 
-  # ===== Stage 2: Security Report =====
-  - stage: SecurityReport
-    displayName: 'Security Report'
-    dependsOn: SecurityScan
-    condition: always()  # Auch bei Scan-Fehlern ausführen
-    jobs:
-      - job: GenerateReport
-        displayName: 'Bericht erstellen'
-        pool:
-          vmImage: 'ubuntu-latest'
-        steps:
-          - script: |
-              echo "============================================"
-              echo "  Security Scan Report"
-              echo "  Build: $(Build.BuildNumber)"
-              echo "  Branch: $(Build.SourceBranchName)"
-              echo "  Datum: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-              echo "============================================"
-              echo ""
-              echo "Durchgeführte Scans:"
-              echo "  1. Dependency Scanning (npm audit)"
-              echo "  2. Secret Scanning"
-              echo "  3. SAST (Static Analysis)"
-              echo ""
-              echo "Empfehlungen für die Praxis:"
-              echo ""
-              echo "  Tools für produktiven Einsatz:"
-              echo "  - Dependency Check: Snyk, WhiteSource, npm audit"
-              echo "  - Secret Scanning:  GitLeaks, TruffleHog"
-              echo "  - SAST:             SonarQube, Checkmarx, Semgrep"
-              echo "  - Container Scan:   Trivy, Aqua Security"
-              echo ""
-              echo "  Integration in Azure DevOps:"
-              echo "  - SonarQube: 'SonarQubePrepare@5' und 'SonarQubeAnalyze@5' Tasks"
-              echo "  - Snyk: 'SnykSecurityScan@1' Task (Marketplace Extension)"
-              echo "  - Microsoft Defender: 'MicrosoftSecurityDevOps@1' Task"
-              echo ""
-              echo "  Pipeline-Policy:"
-              echo "  - Security Scans als Quality Gate: Pipeline bei"
-              echo "    kritischen Findings blocken"
-              echo "  - PR-Checks: Security Scan als Required Check"
-              echo "    für Pull Requests konfigurieren"
-            displayName: 'Security Report'
-
-  # ===== Stage 3: Build (nur wenn Security OK) =====
+  # ===== Stage 3: Build =====
   - stage: Build
     displayName: 'Build'
     dependsOn: SecurityScan
@@ -409,22 +365,15 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
   erkennen und weniger False Positives produzieren.
 - **SAST Scanning**: Prüft den Quellcode auf vier häufige Schwachstellen-
   Muster aus den OWASP Top 10. Die grep-basierte Analyse ist bewusst
-  einfach gehalten — professionelle SAST-Tools analysieren den Abstract
+  einfach gehalten - professionelle SAST-Tools analysieren den Abstract
   Syntax Tree (AST) und erkennen Schwachstellen kontextbezogen.
-- **SecurityReport-Stage**: Läuft mit `condition: always()` auch dann, wenn
-  die Scan-Stage Fehler hatte. Gibt eine Zusammenfassung mit Empfehlungen
-  für professionelle Tools und deren Integration in Azure DevOps aus.
-- **Build-Stage**: Hängt von der SecurityScan-Stage ab. In der Praxis
-  würdest du `condition: succeeded()` verwenden, damit der Build nur bei
-  bestandenen Scans läuft. Für das Lab verwenden wir `condition: always()`,
-  damit du den Build auch mit Findings beobachten kannst.
 
 ### Schritt 3: Committen und Pipeline starten
 
 ```bash
 git add src/vulnerable-demo.js package.json azure-pipelines.yml
 git commit -m "Add security scanning pipeline"
-git push origin master
+git push
 ```
 
 ### Schritt 4: Security-Findings analysieren
@@ -436,194 +385,6 @@ Security-Jobs:
    mindestens eine Schwachstelle für `lodash@4.17.20` sehen (Prototype
    Pollution, Severity: High).
 2. **Secret Scanning**: Findet die hardcoded Credentials in
-   `vulnerable-demo.js` — das Datenbankpasswort und den API-Key.
+   `vulnerable-demo.js` - das Datenbankpasswort und den API-Key.
 3. **SAST Scanning**: Findet bis zu vier Schwachstellen: Command Injection,
    SQL Injection, XSS und Path Traversal.
-
-Der Security Report in der zweiten Stage fasst die Ergebnisse zusammen und
-empfiehlt professionelle Tools für den produktiven Einsatz.
-
-### Schritt 5: Schwachstellen beheben (Übung)
-
-Jetzt beheben wir die gefundenen Schwachstellen, um zu zeigen, wie der
-Security-Scan-Zyklus funktioniert: Finden > Beheben > Erneut scannen.
-
-Erstelle die Datei **src/secure-demo.js** — die bereinigte Version der
-Demo-Anwendung mit Erklärungen für jeden Fix:
-
-```javascript
-// Sichere Version der Demo-Anwendung
-
-const { execFile } = require('child_process');
-
-// Fix 1: Credentials aus Umgebungsvariablen
-const DB_PASSWORD = process.env.DB_PASSWORD;
-const API_KEY = process.env.API_KEY;
-
-// Fix 2: Kein Shell-Aufruf mit Benutzereingaben
-function runCommand(userInput) {
-  // SICHER: execFile statt execSync, validierte Eingabe
-  const sanitized = userInput.replace(/[^a-zA-Z0-9\s]/g, '');
-  return new Promise((resolve, reject) => {
-    execFile('echo', [sanitized], (error, stdout) => {
-      if (error) reject(error);
-      else resolve(stdout);
-    });
-  });
-}
-
-// Fix 3: Parameterisierte Query (simuliert)
-function getUser(userId) {
-  // SICHER: Parameter-Platzhalter statt String-Konkatenation
-  const query = "SELECT * FROM users WHERE id = $1";
-  const params = [userId];
-  console.log("Query:", query, "Params:", params);
-  return { query, params };
-}
-
-// Fix 4: HTML-Escaping
-function escapeHtml(str) {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-function renderPage(userInput) {
-  // SICHER: Input wird escaped
-  const safe = escapeHtml(userInput);
-  return `<html><body><h1>Willkommen, ${safe}</h1></body></html>`;
-}
-
-// Fix 5: Pfad-Validierung
-const path = require('path');
-function readFile(filename) {
-  const fs = require('fs');
-  // SICHER: Pfad wird normalisiert und validiert
-  const basePath = '/data/';
-  const fullPath = path.resolve(basePath, filename);
-  if (!fullPath.startsWith(basePath)) {
-    throw new Error('Zugriff verweigert: Pfad außerhalb des erlaubten Bereichs');
-  }
-  return fs.readFileSync(fullPath, 'utf8');
-}
-
-module.exports = { runCommand, getUser, renderPage, readFile };
-```
-
-Gehe die fünf Fixes durch:
-
-- **Fix 1 (Credentials)**: Statt hardcoded Werte werden Umgebungsvariablen
-  verwendet. In Azure Pipelines kommen die Werte aus Key Vault (Lab 05)
-  oder Secret-Variablen.
-- **Fix 2 (Command Injection)**: `execFile` statt `execSync` — es führt ein
-  Programm direkt aus, ohne Shell-Interpretation. Zusätzlich wird die Eingabe
-  sanitized (nur alphanumerische Zeichen erlaubt).
-- **Fix 3 (SQL Injection)**: Parameterisierte Queries statt
-  String-Konkatenation. Der Datenbankdriver escaped die Parameter automatisch.
-- **Fix 4 (XSS)**: Eine `escapeHtml`-Funktion ersetzt HTML-Sonderzeichen
-  durch ihre Entity-Entsprechungen. In der Praxis verwendet man eine
-  Template-Engine (z. B. Handlebars, EJS), die Auto-Escaping bietet.
-- **Fix 5 (Path Traversal)**: `path.resolve` normalisiert den Pfad (löst
-  `../` auf), und `startsWith` prüft, ob der resultierende Pfad innerhalb
-  des erlaubten Verzeichnisses liegt.
-
-Lösche die verwundbare Datei und committe die sichere Version:
-
-```bash
-rm src/vulnerable-demo.js
-git add src/secure-demo.js src/vulnerable-demo.js package.json
-git commit -m "Fix security vulnerabilities found by scanning"
-git push origin master
-```
-
-Beobachte den zweiten Pipeline-Run: Die Secret- und SAST-Scans sollten
-deutlich weniger oder keine Findings mehr zeigen, da die hardcoded Credentials
-und die unsicheren Code-Muster entfernt wurden.
-
-## Validierung
-
-Vergleiche die beiden Pipeline-Runs im Browser:
-
-```bash
-az pipelines runs list --top 2 --output table
-```
-
-Prüfe in den Logs:
-
-- **Erster Run**: Alle drei Scan-Jobs finden Schwachstellen. Die Steps sind
-  als "partially succeeded" (orange) markiert.
-- **Zweiter Run**: Secret Scan und SAST zeigen deutlich weniger oder keine
-  Findings. Die npm-audit-Ergebnisse können je nach lodash-Version noch
-  Findings zeigen — `npm audit fix` würde sie beheben.
-
-## Erwartetes Ergebnis
-
-**Erster Run (mit Schwachstellen):**
-
-```
-=== Secret Scanning ===
-WARNUNG: Mögliches Secret gefunden:
-src/vulnerable-demo.js:7:const DB_PASSWORD = "SuperSecret123!";
-src/vulnerable-demo.js:8:const API_KEY = "sk-1234567890abcdef";
-
-===============================
-  SECRETS GEFUNDEN!
-===============================
-```
-
-```
-=== SAST-Ergebnis ===
-  Gefundene Probleme: 4
-  STATUS: Sicherheitsprobleme gefunden!
-```
-
-**Zweiter Run (nach Fix):**
-
-```
-=== Secret Scanning ===
-Keine Secrets gefunden.
-```
-
-```
-=== SAST-Ergebnis ===
-  Gefundene Probleme: 0
-  STATUS: Keine Probleme gefunden
-```
-
-## Aufräumen
-
-Kein Aufräumen nötig. Die Pipeline hat keine Azure-Ressourcen erstellt.
-
-## Tipps und Troubleshooting
-
-- **npm audit Findings**: Nicht jedes Finding ist kritisch. Prüfe den
-  Schweregrad (Severity) und ob die Schwachstelle in deinem Kontext
-  ausnutzbar ist. Eine Prototype-Pollution-Schwachstelle in einer
-  Server-Bibliothek ist kritischer als in einem Build-Tool.
-- **False Positives**: SAST-Tools (besonders einfache grep-basierte wie in
-  diesem Lab) produzieren oft False Positives. Professionelle Tools wie
-  SonarQube analysieren den Datenfluss und reduzieren False Positives
-  erheblich. Konfiguriere Ausnahmeregeln für bekannte False Positives.
-- **Quality Gates**: In der Praxis sollten **kritische** Security-Findings
-  den Build blockieren. Setze `continueOnError: false` für kritische Scans
-  und `continueOnError: true` für informative Scans. Oder verwende Exit Codes:
-  `exit 1` für kritische Findings, `exit 0` für Warnungen.
-- **SonarQube**: Für professionelles SAST empfiehlt sich SonarQube. Es gibt
-  eine kostenlose Community Edition und eine Azure DevOps Extension mit den
-  Tasks `SonarQubePrepare@5`, `SonarQubeAnalyze@5` und `SonarQubePublish@5`.
-  SonarQube bietet ein Dashboard mit Trends, Schwachstellen-Details und
-  Coverage-Informationen.
-- **OWASP Dependency-Check**: Für umfassendere Dependency-Scans (über npm
-  hinaus) verwende den OWASP Dependency-Check Task aus dem Marketplace. Er
-  unterstützt Java, .NET, Python und viele weitere Ökosysteme.
-- **PR-Integration**: Konfiguriere Security-Scans als **Required Check** für
-  Pull Requests. So wird kein Code mit bekannten Schwachstellen in den
-  `master`-Branch gemergt. Unter **Project Settings > Repositories > Policies**
-  kannst du Build-Validierungen als Pflicht-Checks konfigurieren.
-- **Compliance**: In regulierten Branchen (Finanz, Gesundheit) können
-  Security-Scans als Pflicht-Gates vorgeschrieben sein. Dokumentiere die
-  Scan-Ergebnisse und bewahre sie als Audit-Trail auf — professionelle Tools
-  bieten dafür Export-Funktionen.
