@@ -1,0 +1,36 @@
+# Step-Template: Health Check mit Retry-Logik
+# Verwendung:
+#   - template: templates/health-check.yml
+#     parameters:
+#       url: 'http://meine-app.westeurope.azurecontainer.io/health'
+
+parameters:
+  - name: url
+    type: string
+  - name: retries
+    type: number
+    default: 5
+
+steps:
+  - script: |
+      echo "=== Health Check ==="
+      echo "URL: ${{ parameters.url }}"
+
+      for i in $(seq 1 ${{ parameters.retries }}); do
+        echo "Versuch $i/${{ parameters.retries }}..."
+        HTTP_CODE=$(curl -s -o /tmp/health-response.txt -w "%{http_code}" "${{ parameters.url }}" 2>/dev/null)
+
+        if [ "$HTTP_CODE" = "200" ]; then
+          echo "Health Check bestanden! (HTTP $HTTP_CODE)"
+          cat /tmp/health-response.txt
+          echo ""
+          exit 0
+        fi
+
+        echo "HTTP Status: $HTTP_CODE — warte 15 Sekunden..."
+        sleep 15
+      done
+
+      echo "Health Check fehlgeschlagen nach ${{ parameters.retries }} Versuchen."
+      exit 1
+    displayName: 'Health Check'

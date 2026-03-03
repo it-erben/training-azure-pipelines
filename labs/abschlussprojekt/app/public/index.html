@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Status Dashboard</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header>
+        <h1>Team Status Dashboard</h1>
+        <p class="subtitle">
+            Version: <span id="app-version">...</span> |
+            Environment: <span id="app-env">...</span>
+        </p>
+    </header>
+
+    <main>
+        <section class="team-grid">
+            <div class="card">
+                <div class="status-indicator status-online"></div>
+                <h2>Anna Schmidt</h2>
+                <p class="role">Backend Developer</p>
+                <p class="status-text">Online — arbeitet an Feature #42</p>
+            </div>
+
+            <div class="card">
+                <div class="status-indicator status-busy"></div>
+                <h2>Ben Müller</h2>
+                <p class="role">Frontend Developer</p>
+                <p class="status-text">Busy — in einem Meeting</p>
+            </div>
+
+            <div class="card">
+                <div class="status-indicator status-online"></div>
+                <h2>Clara Weber</h2>
+                <p class="role">DevOps Engineer</p>
+                <p class="status-text">Online — Pipeline-Optimierung</p>
+            </div>
+
+            <div class="card">
+                <div class="status-indicator status-offline"></div>
+                <h2>David Fischer</h2>
+                <p class="role">QA Engineer</p>
+                <p class="status-text">Offline — im Urlaub</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Deployed via Azure Pipelines</p>
+    </footer>
+
+    <script>
+        fetch('/api/info')
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                document.getElementById('app-version').textContent = data.version;
+            })
+            .catch(function() {
+                document.getElementById('app-version').textContent = 'unknown';
+            });
+
+        fetch('/health')
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                document.getElementById('app-env').textContent = data.environment;
+            })
+            .catch(function() {
+                document.getElementById('app-env').textContent = 'unknown';
+            });
+    </script>
+</body>
+</html>
