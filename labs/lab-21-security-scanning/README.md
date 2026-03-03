@@ -154,7 +154,7 @@ wird. Die aktuelle Version `4.17.21` behebt diese Schwachstelle.
 ### Schritt 2: Pipeline mit Security Scanning
 
 Jetzt erstellen wir eine Pipeline mit drei parallelen Security-Scans.
-Die Scans laufen parallel, um Zeit zu sparen - jeder prüft einen 
+Die Scans laufen parallel, um Zeit zu sparen - jeder prüft einen
 anderen Aspekt der Sicherheit.
 
 Ersetze den Inhalt von `azure-pipelines.yml`:
