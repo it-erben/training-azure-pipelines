@@ -398,7 +398,7 @@ git push
 aus dem Template-Repository ein. Die Verbindung zwischen den Repositories
 wird über `resources.repositories` hergestellt.
 
-Ersetze den Inhalt von `azure-pipelines.yml` 
+Ersetze den Inhalt von `azure-pipelines.yml`
 und **ersetze deinen Projektnamen** (z.B. teilnehmer01):
 
 ```yaml
