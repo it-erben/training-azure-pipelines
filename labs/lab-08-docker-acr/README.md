@@ -314,11 +314,11 @@ docker stop hello-test && docker rm hello-test
 $ACR_PASSWORD = (az acr credential show --name $ACR_NAME --query "passwords[0].value" -o tsv)
 
 # Einloggen
-docker login $ACR_NAME.azurecr.io -u $ACR_NAME -p $ACR_PASSWORD
+docker login "$ACR_NAME.azurecr.io" -u $ACR_NAME -p $ACR_PASSWORD
 
 # Image pullen und starten
-docker pull $ACR_NAME.azurecr.io/hello-pipeline:latest
-docker run -d -p 8080:80 --name hello-test $ACR_NAME.azurecr.io/hello-pipeline:latest
+docker pull "$ACR_NAME.azurecr.io/hello-pipeline:latest"
+docker run -d -p 8080:80 --name hello-test "$ACR_NAME.azurecr.io/hello-pipeline:latest"
 
 # Warten, bis der Container gestartet wurde
 Start-Sleep -Seconds 20
@@ -333,14 +333,3 @@ docker rm hello-test
 Du solltest die `index.html` aus dem Repository sehen,
 ausgeliefert von nginx im Docker-Container.
 
-## Aufräumen
-
-Die ACR verursacht laufende Kosten (Basic SKU ca. 5 EUR/Monat). Lösche sie nach
-dem Lab, wenn du sie nicht mehr benötigst:
-
-```bash
-# ACR löschen
-az acr delete --name $ACR_NAME --resource-group rg-pipeline-training --yes
-```
-
-Die Service Connection `acr-training-connection` kannst du ebenfalls löschen.
