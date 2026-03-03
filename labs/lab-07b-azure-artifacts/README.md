@@ -31,18 +31,17 @@ erstellen einen projekt-scoped Feed über die Azure DevOps UI:
 
 1. Gehe zu **Artifacts** im linken Menü deines Projekts.
 2. Klicke auf **"Create Feed"**.
-3. Name: `npm-training`.
+3. Name: `npm-training-<deine-teilnehmernr>` (z. B. `npm-training-01`).
 4. Visibility: **"Members of your Microsoft Entra tenant"** (Standard).
 5. Setze den Haken bei **"Include packages from common public sources"** - das
    aktiviert Upstream Sources (npmjs.com wird als Proxy eingebunden).
 6. Klicke auf **"Create"**.
 
-Der Feed ist jetzt unter **Artifacts > npm-training** sichtbar. Damit die
-Pipeline Pakete in den Feed publizieren kann, muss der Build Service als
-**Contributor** berechtigt werden:
+Der Feed ist jetzt unter **Artifacts** sichtbar. Damit die Pipeline Pakete in
+den Feed publizieren kann, muss der Build Service als **Contributor** berechtigt
+werden:
 
-1. Öffne den Feed **npm-training** und klicke auf das Zahnrad-Symbol
-   (**Feed Settings**).
+1. Öffne deinen Feed und klicke auf das Zahnrad-Symbol (**Feed Settings**).
 2. Wechsle zum Tab **"Permissions"**.
 3. Klicke auf **"Add users/groups"**.
 4. Suche nach **"[dein Projektname] Build Service"** (z. B.
@@ -148,6 +147,8 @@ trigger:
 
 variables:
   nodeVersion: '20.x'
+  # Ersetze mit deiner Teilnehmernummer (z. B. npm-training-01)
+  feedName: 'npm-training-<deine-teilnehmernr>'
 
 stages:
   # ===== Build & Test =====
@@ -198,7 +199,7 @@ stages:
               command: 'publish'
               workingDir: '$(Pipeline.Workspace)/hello-utils-package'
               publishRegistry: 'useFeed'
-              publishFeed: '$(System.TeamProject)/npm-training'
+              publishFeed: '$(System.TeamProject)/$(feedName)'
 ```
 
 Gehe die Pipeline Abschnitt für Abschnitt durch:
@@ -221,10 +222,12 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
   Pipelines abzuwickeln (kein manuelles Token nötig). `publishFeed` referenziert
   den Feed im Format `<projektname>/<feedname>`. Die vordefinierte Variable
   `$(System.TeamProject)` wird automatisch mit dem Namen des aktuellen Azure
-  DevOps Projekts aufgelöst, sodass kein manueller Platzhalter ersetzt werden
-  muss.
+  DevOps Projekts aufgelöst.
 
 ### Schritt 4: Committen und Pipeline starten
+
+Nachdem du den Feed-Namen in der Pipeline-Datei eingesetzt hast, committe und
+pushe:
 
 ```bash
 git add hello-utils/ azure-pipelines.yml
@@ -242,7 +245,7 @@ before this run can continue"*. Klicke auf **"View"** und dann auf **"Permit"**.
 Nach erfolgreichem Pipeline-Run kannst du das Paket im Feed sehen:
 
 1. Gehe zu **Artifacts** im linken Menü.
-2. Wähle den Feed **npm-training**.
+2. Wähle deinen Feed (z. B. **npm-training-01**).
 3. Du siehst das Paket `hello-pipeline-utils` in der Liste.
 4. Klicke auf das Paket, um Details zu sehen: Version, Publish-Datum und
    Description.
@@ -254,7 +257,7 @@ Nach erfolgreichem Pipeline-Run kannst du das Paket im Feed sehen:
 
 Lösche den Feed über die Azure DevOps UI:
 
-1. Gehe zu **Artifacts > npm-training**.
+1. Gehe zu **Artifacts** und wähle deinen Feed (z. B. **npm-training-01**).
 2. Klicke auf das Zahnrad-Symbol (**Feed Settings**).
 3. Klicke auf **"Delete Feed"** und bestätige.
 
