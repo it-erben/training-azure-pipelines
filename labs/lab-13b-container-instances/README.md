@@ -37,12 +37,12 @@ Der Unterschied zu den anderen Deployment-Optionen:
 
 Erstelle in deinem Azure DevOps Projekt ein neues Git-Repository für dieses Lab:
 
-1. Gehe zu **Repos > Repositories** (oben links auf den Repository-Namen
-   klicken, dann **"Manage repositories"**).
-2. Klicke auf **"Create"**.
+1. Gehe zu **Repos**, dann oben den **Dropdown** öffnen mit dem aktuellen
+   Repo-Namen.
+2. Klicke auf **"New Repository"**.
 3. Repository-Name: `aci-demo`.
 4. Klicke auf **"Create"**.
-5. Klone das neue Repository lokal:
+5. Klicke auf **"Clone"**, kopiere die URL und klone das neue Repository lokal:
 
 ```bash
 git clone <url-des-neuen-repos>
@@ -195,27 +195,18 @@ stages:
               docker pull $(acrLoginServer)/$(imageName):latest || true
             displayName: 'Cache: Vorheriges Image pullen'
 
-          - task: Docker@2
-            displayName: 'Docker Build'
-            inputs:
-              containerRegistry: 'acr-aci-connection'
-              repository: '$(imageName)'
-              command: 'build'
-              Dockerfile: '**/Dockerfile'
-              arguments: '--cache-from=$(acrLoginServer)/$(imageName):latest'
-              tags: |
-                $(imageTag)
-                latest
+          - script: |
+              docker build \
+                --cache-from=$(acrLoginServer)/$(imageName):latest \
+                -t $(acrLoginServer)/$(imageName):$(imageTag) \
+                -t $(acrLoginServer)/$(imageName):latest \
+                .
+            displayName: 'Docker Build (mit Layer Cache)'
 
-          - task: Docker@2
+          - script: |
+              docker push $(acrLoginServer)/$(imageName):$(imageTag)
+              docker push $(acrLoginServer)/$(imageName):latest
             displayName: 'Docker Push'
-            inputs:
-              containerRegistry: 'acr-aci-connection'
-              repository: '$(imageName)'
-              command: 'push'
-              tags: |
-                $(imageTag)
-                latest
 
   # ===== Deploy to ACI =====
   - stage: Deploy
@@ -350,7 +341,7 @@ Committe alle Dateien und pushe:
 ```bash
 git add index.html Dockerfile .dockerignore azure-pipelines.yml
 git commit -m "Add ACI deployment pipeline"
-git push origin main
+git push
 ```
 
 Erstelle anschließend die Pipeline in Azure DevOps:
@@ -371,39 +362,7 @@ before this run can continue"*. Klicke auf **"View"** und dann auf
 ### Schritt 7: Container im Browser prüfen
 
 Nach erfolgreichem Deployment findest du den FQDN (Fully Qualified Domain Name)
-des Containers im Log der Deploy- oder Verify-Stage. Du kannst ihn auch
-manuell abfragen:
-
-**Bash:**
-
-```bash
-# Projektnamen wie in der Pipeline normalisieren
-PROJECT_NAME="<dein-azure-devops-projekt>"
-PROJECT_SLUG=$(echo "$PROJECT_NAME" \
-  | tr '[:upper:]' '[:lower:]' \
-  | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')
-PROJECT_SLUG="${PROJECT_SLUG:0:20}"
-CONTAINER_NAME="aci-demo-${PROJECT_SLUG}"
-
-az container show \
-  --name "$CONTAINER_NAME" \
-  --resource-group rg-pipeline-training \
-  --query "ipAddress.fqdn" -o tsv
-```
-
-**PowerShell:**
-
-```powershell
-$ProjectName = "<dein-azure-devops-projekt>"
-$ProjectSlug = (($ProjectName.ToLower() -replace '[^a-z0-9]+','-').Trim('-'))
-$ProjectSlug = $ProjectSlug.Substring(0, [Math]::Min(20, $ProjectSlug.Length))
-$ContainerName = "aci-demo-$ProjectSlug"
-
-az container show `
-  --name $ContainerName `
-  --resource-group rg-pipeline-training `
-  --query "ipAddress.fqdn" -o tsv
-```
+des Containers im Log der Deploy- oder Verify-Stage.
 
 Öffne `http://<fqdn>` im Browser - du solltest die HTML-Seite mit "Hello from
 Azure Container Instances!" sehen.
@@ -414,49 +373,3 @@ inspizieren:
 - **Containers > Logs**: Stdout/Stderr des laufenden Containers
 - **Containers > Events**: Start- und Pull-Events
 - **Monitoring > Metrics**: CPU- und Speicherverbrauch
-
-## Aufräumen
-
-Der ACI-Container verursacht laufende Kosten, solange er läuft. Lösche ihn und
-die ACR nach dem Lab:
-
-**Bash:**
-
-```bash
-PROJECT_NAME="<dein-azure-devops-projekt>"
-PROJECT_SLUG=$(echo "$PROJECT_NAME" \
-  | tr '[:upper:]' '[:lower:]' \
-  | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')
-PROJECT_SLUG="${PROJECT_SLUG:0:20}"
-CONTAINER_NAME="aci-demo-${PROJECT_SLUG}"
-
-# Container löschen
-az container delete \
-  --name "$CONTAINER_NAME" \
-  --resource-group rg-pipeline-training \
-  --yes
-
-# ACR löschen
-az acr delete --name <dein-acr-name> --resource-group rg-pipeline-training --yes
-```
-
-**PowerShell:**
-
-```powershell
-$ProjectName = "<dein-azure-devops-projekt>"
-$ProjectSlug = (($ProjectName.ToLower() -replace '[^a-z0-9]+','-').Trim('-'))
-$ProjectSlug = $ProjectSlug.Substring(0, [Math]::Min(20, $ProjectSlug.Length))
-$ContainerName = "aci-demo-$ProjectSlug"
-
-# Container löschen
-az container delete `
-  --name $ContainerName `
-  --resource-group rg-pipeline-training `
-  --yes
-
-# ACR löschen
-az acr delete --name <dein-acr-name> --resource-group rg-pipeline-training --yes
-```
-
-Die Service Connection `acr-aci-connection` kannst du unter **Project Settings >
-Service connections** ebenfalls löschen.
