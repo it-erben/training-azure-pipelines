@@ -332,4 +332,3 @@ docker rm hello-test
 
 Du solltest die `index.html` aus dem Repository sehen,
 ausgeliefert von nginx im Docker-Container.
-
