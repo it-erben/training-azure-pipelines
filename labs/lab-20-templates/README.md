@@ -396,28 +396,17 @@ variables:
 ```bash
 git add -A
 git commit -m "Add pipeline templates library"
-git push origin master
+git push
 ```
 
 ### Schritt 7: Templates in der Anwendungs-Pipeline verwenden
 
-Jetzt wechseln wir zurück zum Anwendungs-Repository und binden die Templates
+**Jetzt wechseln wir zurück zum Repository hello-pipeline** und binden die Templates
 aus dem Template-Repository ein. Die Verbindung zwischen den Repositories
 wird über `resources.repositories` hergestellt.
 
-**Bash:**
-
-```bash
-cd ~/hello-pipeline
-```
-
-**PowerShell:**
-
-```powershell
-Set-Location $HOME/hello-pipeline
-```
-
-Ersetze den Inhalt von `azure-pipelines.yml`:
+Ersetze den Inhalt von `azure-pipelines.yml` 
+und **ersetze deinen Projektnamen** (z.B. teilnehmer01):
 
 ```yaml
 trigger:
@@ -515,87 +504,3 @@ Beobachte den Pipeline-Run im Browser. Die Steps, die aus Templates stammen,
 erscheinen in der Pipeline wie reguläre Steps — du siehst die
 `displayName`-Werte aus den Templates (z. B. "Node.js 20.x installieren",
 "Abhängigkeiten installieren").
-
-## Validierung
-
-```bash
-# Prüfe, ob das Template-Repository existiert
-az repos list --output table
-
-# Pipeline-Status
-az pipelines runs list --top 1 --output table
-```
-
-Öffne im Browser den Pipeline-Run und prüfe:
-
-- Die Steps aus dem Template `steps/nodejs-build.yml` erscheinen in der
-  Build-Stage: "Node.js 20.x installieren", "Versionen prüfen",
-  "Abhängigkeiten installieren", "Build ausführen".
-- Die Steps aus `steps/run-tests.yml` erscheinen in der Test-Stage.
-- Der Deploy-Job aus `jobs/deploy-job.yml` erscheint in der DeployDev-Stage.
-- Die Variablen `$(nodeVersion)` und `$(buildConfiguration)` werden mit den
-  Werten aus dem Variable-Template aufgelöst.
-
-## Erwartetes Ergebnis
-
-Die Pipeline verwendet Templates aus dem separaten Repository. Im Build-Log
-siehst du die Steps, die aus den Templates kommen:
-
-```
-Node.js 20.x installieren
-Versionen prüfen
-Abhängigkeiten installieren
-Build ausführen
-Build-Info
-```
-
-Die Steps erscheinen in der Pipeline wie reguläre Steps — es ist im Log
-nicht direkt erkennbar, dass sie aus einem Template stammen. Um die aufgelöste
-YAML-Datei zu sehen, klicke beim Pipeline-Run auf die drei Punkte (...) >
-**"Download full YAML"**.
-
-## Aufräumen
-
-Das Template-Repository kann für zukünftige Projekte nützlich sein. Falls du
-es löschen möchtest:
-
-```bash
-# Repository-ID herausfinden
-az repos list --output table
-
-# Repository löschen (ersetze <repo-id> durch die tatsächliche ID)
-# az repos delete --id <repo-id> --yes
-```
-
-## Tipps und Troubleshooting
-
-- **"Template not found"**: Prüfe den Repository-Namen in
-  `resources.repositories`. Das Format ist `<projekt>/<repository>`. Prüfe
-  auch, ob der Branch (`ref`) existiert und ob die Template-Datei am
-  angegebenen Pfad liegt.
-- **Template-Referenz mit und ohne `@`**: Templates aus dem **eigenen
-  Repository** brauchen kein `@`-Suffix (z. B. `template: templates/build.yml`).
-  Templates aus **externen Repositories** brauchen `@<alias>` (z. B.
-  `template: steps/build.yml@templates`).
-- **Pflicht-Parameter**: Parameter ohne Default-Wert müssen beim Einbinden
-  angegeben werden. Azure Pipelines meldet beim Parsen einen Fehler, wenn ein
-  Pflicht-Parameter fehlt.
-- **Verschachtelte Templates**: Templates können andere Templates einbinden
-  (wie unser Job-Template, das Step-Templates einbindet). Achte auf
-  **zirkuläre Referenzen** — Template A bindet Template B ein, das wiederum
-  Template A einbindet. Azure Pipelines erkennt das und meldet einen Fehler.
-- **Versionierung**: Verwende `ref: refs/tags/v1.0` statt
-  `ref: refs/heads/master` für stabile Template-Versionen. So kannst du
-  Templates weiterentwickeln, ohne laufende Pipelines zu brechen. Pipelines
-  aktualisieren auf eine neue Version durch Ändern des `ref`-Werts.
-- **Template-Debugging**: Bei Fehlern in Templates zeigt Azure DevOps die
-  aufgelöste (expandierte) YAML-Datei an. Klicke beim Pipeline-Run auf die
-  drei Punkte (...) > **"Download full YAML"**. Die heruntergeladene Datei
-  zeigt die Pipeline mit allen eingefügten Templates — nützlich für die
-  Fehlersuche.
-- **`extends`-Templates**: Neben `template` gibt es `extends` — ein
-  Mechanismus, bei dem das Template die **Grundstruktur** der Pipeline
-  vorgibt und die aufrufende Pipeline nur noch Parameter übergibt. Das ist
-  nützlich für Sicherheitsrichtlinien: Das Platform-Team definiert
-  Pflicht-Steps (z. B. Security Scans), die kein Projekt-Team überspringen
-  kann.
