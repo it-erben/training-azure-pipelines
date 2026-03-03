@@ -275,14 +275,7 @@ jobs:
             - script: |
                 echo "Deploying to ${{ parameters.environment }}"
                 echo "App: ${{ parameters.appName }}"
-                echo "Artefakte:"
-                ls -la $(Pipeline.Workspace)/${{ parameters.artifactName }}/
               displayName: 'Deployment Info'
-
-            # In einem realen Szenario würde hier der AzureWebApp-Task stehen
-            - script: |
-                echo "Deployment nach ${{ parameters.environment }} abgeschlossen!"
-              displayName: 'Deploy'
 ```
 
 Dieses Template hat **Pflicht-Parameter** (`environment`, `azureSubscription`,
