@@ -158,7 +158,7 @@ data "azurerm_resource_group" "app" {
 
 # App Service Plan
 resource "azurerm_service_plan" "app" {
-  name                = "plan-${var.project_name}-${var.environment}"
+  name                = "plan-${var.project_name}-${var.environment}-${var.unique_suffix}"
   resource_group_name = data.azurerm_resource_group.app.name
   location            = var.location
   os_type             = "Linux"
@@ -575,6 +575,7 @@ az resource list --resource-group rg-pipeline-training --query "[?tags.ManagedBy
 Plan: 2 to add, 0 to change, 0 to destroy.
 
 Changes to Outputs:
+  + app_service_plan   = "plan-training-app-dev-mmu"
   + resource_group_name = "rg-pipeline-training"
   + web_app_name        = "training-app-dev-mmu"
   + web_app_url         = "https://training-app-dev-mmu.azurewebsites.net"
@@ -586,6 +587,7 @@ Changes to Outputs:
 Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
 
 Outputs:
+app_service_plan = "plan-training-app-dev-mmu"
 resource_group_name = "rg-pipeline-training"
 web_app_name = "training-app-dev-mmu"
 web_app_url = "https://training-app-dev-mmu.azurewebsites.net"

@@ -28,22 +28,14 @@ Haupt-Slot. Der Ablauf ist:
 5. Bei Problemen nach dem Swap: erneut swappen - die alte Version ist noch im
    Staging-Slot und sofort wieder live.
 
-Ein wichtiger Aspekt beim Swap: Azure App Service "wärmt" die neue Instanz
-**vor dem Swap** auf (Warm-up). Das bedeutet, dass der erste Request nach dem
-Swap nicht den Cold-Start-Penalty hat, den wir in Lab 13 beobachtet haben.
+### Slot-Erkennung zur Laufzeit
 
-### Slot-Sticky Settings
-
-Beim Swap wandern App-Settings standardmäßig **mit dem Code mit**. Das ist für
-die meisten Settings sinnvoll (z. B. `APP_VERSION`), aber für Settings, die den
-Slot selbst beschreiben (z. B. `SLOT_NAME`), wäre das verwirrend: Nach dem Swap
-würde Production den Wert `staging` anzeigen, obwohl es der Production-Slot ist.
-
-Azure bietet dafür **Slot-Sticky Settings** (auch "Deployment Slot Settings"
-genannt). Diese Settings bleiben beim Swap an ihrem Slot haften - sie wandern
-nicht mit dem Code. Wir nutzen das für `SLOT_NAME`, damit jeder Slot immer
-seinen korrekten Namen anzeigt, unabhängig davon, welche Code-Version gerade
-dort läuft.
+Node.js liest Umgebungsvariablen beim Prozessstart.
+Beim Slot-Swap werden Apps nicht in jedem Fall so neu gestartet, dass eine
+geänderte Slot-Variable sofort im Prozess sichtbar wird. Für die Anzeige des
+aktuellen Slots ermitteln wir ihn daher **zur Laufzeit aus dem Hostnamen** der
+eingehenden Anfrage (`<app>.azurewebsites.net` vs.
+`<app>-staging.azurewebsites.net`).
 
 **Hinweis**: Deployment Slots erfordern mindestens den **Standard (S1)**-Tarif.
 Der für das Training bereitgestellte S1-Plan unterstützt Deployment Slots und
@@ -58,11 +50,11 @@ wird am Ende des Trainings automatisch per Terraform aufgeräumt.
 
 ## Aufgabenstellung
 
-### Schritt 1: Staging-Slot und Slot-Sticky Settings erstellen
+### Schritt 1: Staging-Slot erstellen
 
 Deine Web App (`app-training-teilnehmerNN`) läuft bereits auf einem S1-Plan,
 der Deployment Slots unterstützt. In diesem Schritt erstellst du den
-Staging-Slot und konfigurierst Slot-Sticky Settings.
+Staging-Slot.
 
 Falls noch nicht geschehen in der letzten Übungsaufgabe, setze
 den APP_NAME als Variable:
@@ -92,18 +84,6 @@ az webapp deployment slot create \
   --slot staging \
   --output table
 
-# Slot-sticky Settings: SLOT_NAME bleibt beim Swap am jeweiligen Slot.
-# Ohne --slot wirkt der Befehl auf den Production-Slot (= die Web App selbst).
-az webapp config appsettings set \
-  --name $APP_NAME --resource-group rg-pipeline-training \
-  --slot-settings SLOT_NAME=production
-
-# Mit --slot staging setzen wir das Setting für den Staging-Slot.
-az webapp config appsettings set \
-  --name $APP_NAME --resource-group rg-pipeline-training \
-  --slot staging \
-  --slot-settings SLOT_NAME=staging
-
 echo "Production URL: https://$APP_NAME.azurewebsites.net"
 echo "Staging URL:    https://$APP_NAME-staging.azurewebsites.net"
 ```
@@ -118,18 +98,6 @@ az webapp deployment slot create `
   --slot staging `
   --output table
 
-# Slot-sticky Settings: SLOT_NAME bleibt beim Swap am jeweiligen Slot.
-# Ohne --slot wirkt der Befehl auf den Production-Slot (= die Web App selbst).
-az webapp config appsettings set `
-  --name $APP_NAME --resource-group rg-pipeline-training `
-  --slot-settings SLOT_NAME=production
-
-# Mit --slot staging setzen wir das Setting für den Staging-Slot.
-az webapp config appsettings set `
-  --name $APP_NAME --resource-group rg-pipeline-training `
-  --slot staging `
-  --slot-settings SLOT_NAME=staging
-
 echo "Production URL: https://$APP_NAME.azurewebsites.net"
 echo "Staging URL:    https://$APP_NAME-staging.azurewebsites.net"
 ```
@@ -142,12 +110,6 @@ Nach der Erstellung hast du zwei erreichbare URLs: Die **Production-URL**
 (`<app>.azurewebsites.net`) und die **Staging-URL**
 (`<app>-staging.azurewebsites.net`). Beide sind unabhängige Instanzen - ein
 Deployment in den Staging-Slot hat keine Auswirkung auf die Production-URL.
-
-Das `--slot-settings`-Flag setzt den Wert **und** markiert `SLOT_NAME` als
-**Deployment Slot Setting** (slot-sticky). Beim Swap bleibt dieses Setting an
-seinem Slot - es wandert nicht mit dem Code mit. Der Production-Slot zeigt
-also immer `production` und der Staging-Slot immer `staging`, unabhängig
-davon, welcher Code dort läuft.
 
 ### Schritt 2: App mit Versionsanzeige vorbereiten (v1)
 
@@ -163,9 +125,16 @@ const port = process.env.PORT || 8080;
 
 // Version aus Umgebungsvariable oder Build-Info
 const APP_VERSION = process.env.APP_VERSION || '1.0.0';
-const SLOT_NAME = process.env.SLOT_NAME || 'production';
+
+function getSlotName(req) {
+    // Slot aus Hostname ableiten, damit kein App-Restart notwendig ist
+    const host = (req.headers.host || '').toLowerCase();
+    return host.includes('-staging.azurewebsites.net') ? 'staging' : 'production';
+}
 
 const server = http.createServer((req, res) => {
+    const SLOT_NAME = getSlotName(req);
+
     if (req.url === '/health') {
         res.writeHead(200, {'Content-Type': 'application/json'});
         res.end(JSON.stringify({
@@ -193,17 +162,9 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(port, () => {
-    console.log(`Server v${APP_VERSION} running on port ${port} (Slot: ${SLOT_NAME})`);
+    console.log(`Server v${APP_VERSION} running on port ${port}`);
 });
 ```
-
-Der Server liest zwei Umgebungsvariablen:
-
-- **`APP_VERSION`**: Die Version der Anwendung. Standardwert: `1.0.0`. Wird
-  später von der Pipeline gesetzt.
-- **`SLOT_NAME`**: Der Name des Slots (`staging` oder `production`). Wird
-  **nicht** von der Pipeline gesetzt, sondern kommt aus dem slot-sticky
-  App-Setting, das wir in Schritt 1 konfiguriert haben.
 
 Die Hauptseite zeigt je nach Slot eine unterschiedliche Hintergrundfarbe:
 **Grün für Staging (Green)**, **Blau für Production (Blue)**. So siehst du im
@@ -433,9 +394,7 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
   (Green), nicht in den Haupt-Slot. Der entscheidende Unterschied zu Lab 13 sind
   die Parameter `deployToSlotOrASE: true` und `slotName: 'staging'` im
   `AzureWebApp@1`-Task. Anschließend setzt ein `AzureCLI@2`-Task das
-  App-Setting `APP_VERSION` für den Staging-Slot. Beachte, dass `SLOT_NAME`
-  **nicht** gesetzt wird - dieses Setting haben wir in Schritt 1 als slot-sticky
-  konfiguriert, es bleibt automatisch am Slot haften.
+  App-Setting `APP_VERSION` für den Staging-Slot.
 - **TestGreen-Stage**: Führt Smoke Tests gegen die **Staging-URL** aus
   (`<app>-staging.azurewebsites.net`). Beachte, dass dieser Stage ein normaler
   Job (kein Deployment Job) ist - er führt nur Tests aus, deployt nichts. Die
@@ -529,14 +488,13 @@ Invoke-RestMethod https://$APP_NAME-staging.azurewebsites.net/health
 Erwartete Ergebnisse:
 
 - **Production**: `version: 1.0.XX`, `slot: production` - die neue Version
-  läuft jetzt in Production, und `SLOT_NAME` zeigt korrekt `production` (nicht
-  `staging`!), weil wir es als slot-sticky Setting konfiguriert haben.
+  läuft jetzt in Production.
 - **Staging**: `version: 1.0.0`, `slot: staging` - die alte Version ist im
   Staging-Slot gelandet, bereit für einen sofortigen Rollback.
 
 Im Browser siehst du: Production hat weiterhin einen **blauen** Hintergrund und
 Staging einen **grünen** - obwohl der Code getauscht wurde. Die Farbe folgt dem
-Slot, nicht dem Code, weil `SLOT_NAME` slot-sticky ist.
+Slot, nicht dem Code, weil `slot` pro Request aus der URL ermittelt wird.
 
 ### Schritt 9: Rollback testen
 
@@ -569,63 +527,6 @@ az webapp deployment slot swap `
 
 # Prüfe, ob die alte Version wieder in Production ist
 Invoke-RestMethod https://$APP_NAME.azurewebsites.net/health
-```
-
-## Validierung
-
-Prüfe per CLI, ob beide Slots korrekt konfiguriert sind:
-
-```bash
-# Slot-Status anzeigen
-az webapp deployment slot list --name $APP_NAME --resource-group rg-pipeline-training --output table
-
-# App-Settings beider Slots vergleichen
-echo "=== Production ==="
-az webapp config appsettings list --name $APP_NAME --resource-group rg-pipeline-training --query "[?name=='APP_VERSION'].value" -o tsv
-
-echo "=== Staging ==="
-az webapp config appsettings list --name $APP_NAME --resource-group rg-pipeline-training --slot staging --query "[?name=='APP_VERSION'].value" -o tsv
-
-# Pipeline-Status
-az pipelines runs list --top 1 --output table
-```
-
-Öffne im Browser das Build-Log und prüfe:
-
-- Die **DeployGreen-Stage** zeigt das Deployment in den Staging-Slot.
-- Die **TestGreen-Stage** zeigt die Smoke-Test-Ergebnisse gegen die Staging-URL.
-- Die **SwapSlots-Stage** zeigt den erfolgreichen Swap und den Post-Swap Health
-  Check.
-
-## Erwartetes Ergebnis
-
-Nach dem vollständigen Durchlauf:
-
-```
-# Vor dem Swap:
-$ curl https://<app-name>.azurewebsites.net/health
-{"status":"healthy","version":"1.0.0","slot":"production","timestamp":"..."}
-
-$ curl https://<app-name>-staging.azurewebsites.net/health
-{"status":"healthy","version":"1.0.42","slot":"staging","timestamp":"..."}
-
-# Nach dem Swap:
-$ curl https://<app-name>.azurewebsites.net/health
-{"status":"healthy","version":"1.0.42","slot":"production","timestamp":"..."}
-
-$ curl https://<app-name>-staging.azurewebsites.net/health
-{"status":"healthy","version":"1.0.0","slot":"staging","timestamp":"..."}
-```
-
-Beachte: `slot` zeigt nach dem Swap korrekt `production` bzw. `staging`, weil
-`SLOT_NAME` als slot-sticky Setting konfiguriert ist - es bleibt am Slot, nicht
-am Code.
-
-Pipeline-Ablauf:
-
-```
-[Build] --> [Deploy Green] --> [Test Green] --> [Swap Blue/Green]
-             (Staging-Slot)                      (ggf. Approval Gate)
 ```
 
 ## Aufräumen

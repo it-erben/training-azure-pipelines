@@ -120,6 +120,19 @@ stages:
                         --resource-group rg-pipeline-training \
                         --yes 2>/dev/null || true
 
+                      # Auf asynchrone Löschung warten, damit create nicht kollidiert
+                      for i in {1..24}; do
+                        if ! az container show \
+                          --name $(containerName) \
+                          --resource-group rg-pipeline-training \
+                          --output none 2>/dev/null; then
+                          echo "Vorheriger Container ist gelöscht."
+                          break
+                        fi
+                        echo "Container wird noch gelöscht... warte 5s"
+                        sleep 5
+                      done
+
                       # Container erstellen
                       az container create \
                         --name $(containerName) \
@@ -199,9 +212,11 @@ Gehe die Pipeline Abschnitt für Abschnitt durch:
     1. **ACR-Credentials holen**: `az acr credential show` liest das
        Admin-Passwort der ACR aus. Das funktioniert, weil wir in Lab 08
        `--admin-enabled true` gesetzt haben.
-    2. **Alten Container löschen**: `az container delete ... || true` entfernt
-       einen eventuell vorhandenen Container gleichen Namens. Das `|| true`
-       verhindert einen Fehler, falls kein Container existiert.
+    2. **Alten Container löschen und warten**: `az container delete ... || true`
+       entfernt einen eventuell vorhandenen Container gleichen Namens. Das
+       `|| true` verhindert einen Fehler, falls kein Container existiert. Danach
+       wartet eine kurze Schleife, bis der Container wirklich gelöscht ist, damit
+       das folgende `az container create` nicht mit "already exists" kollidiert.
     3. **Container erstellen**: `az container create` startet eine neue Container
        Instance mit dem Image aus der ACR. `--dns-name-label` weist einen
        öffentlichen DNS-Namen zu, `--ports 80` öffnet den HTTP-Port, und

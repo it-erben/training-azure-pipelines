@@ -34,7 +34,7 @@ eindeutigen Namen mit deinen Initialien:
 
 ```bash
 # Eindeutigen ACR-Namen generieren
-INITIALS="DEINE_INITIALEN"
+INITIALS="deine_initialien_kleingeschrieben"
 ACR_NAME="acrtraining$INITIALS$RANDOM"
 echo "ACR Name: $ACR_NAME"
 ```
@@ -43,7 +43,7 @@ echo "ACR Name: $ACR_NAME"
 
 ```powershell
 # Eindeutigen ACR-Namen generieren
-$INITIALS = "<DEINE_INITIALEN_KLEIN_GESCHRIEBEN>"
+$INITIALS = "deine_initialien_kleingeschrieben"
 $ACR_NAME = "acrtraining$INITIALS$(Get-Random -Maximum 32768)"
 echo "ACR Name: $ACR_NAME"
 ```

@@ -37,7 +37,7 @@ reagieren.
 ## Voraussetzungen
 
 - Die Environments `dev` aus Lab 11.
-- Die Anwendungsdateien (`src/app.js`, `index.html`, `package.json`) aus den
+- Die Anwendungsdateien (`src/server.js`, `index.html`, `package.json`) aus den
   vorherigen Labs.
 
 ## Aufgabenstellung
