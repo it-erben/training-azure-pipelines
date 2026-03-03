@@ -1,0 +1,140 @@
+# Musterlösung — Abschlussprojekt: Pipeline Challenge
+# Deckt alle 8 Anforderungen ab (6 Pflicht + 2 Bonus)
+
+trigger:
+  branches:
+    include:
+      - master                                        # Anforderung 1
+
+variables:
+  - group: dashboard-config                           # Anforderung 6
+  - name: acrName
+    value: '<dein-acr-name>'
+  - name: acrLoginServer
+    value: '<dein-acr-name>.azurecr.io'
+  - name: imageName
+    value: 'team-dashboard'
+  - name: imageTag
+    value: '$(Build.BuildNumber)'
+
+stages:
+  # ===== Stage 1: Test =====                         # Anforderung 2
+  - stage: Test
+    displayName: 'Tests'
+    jobs:
+      - job: RunTests
+        displayName: 'Tests ausführen'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - script: npm test
+            workingDirectory: app
+            displayName: 'Unit Tests ausführen'
+
+  # ===== Stage 2: Build =====                        # Anforderung 3
+  - stage: Build
+    displayName: 'Docker Build'
+    dependsOn: Test
+    jobs:
+      - job: DockerBuild
+        displayName: 'Build and Push'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: Docker@2
+            displayName: 'Docker Build and Push'
+            inputs:
+              containerRegistry: 'acr-training-connection'
+              repository: '$(imageName)'
+              command: 'buildAndPush'
+              Dockerfile: 'app/Dockerfile'
+              buildContext: 'app'
+              tags: |
+                $(imageTag)
+                latest
+
+  # ===== Stage 3: Deploy Dev =====                   # Anforderung 4
+  - stage: DeployDev
+    displayName: 'Deploy Dev'
+    dependsOn: Build
+    jobs:
+      - deployment: DeployToDev
+        displayName: 'Deploy to Dev'
+        pool:
+          vmImage: 'ubuntu-latest'
+        environment: 'dev'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureCLI@2
+                  displayName: 'Deploy auf ACI'
+                  inputs:
+                    azureSubscription: 'azure-training-connection'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      # ACR-Credentials holen
+                      ACR_USERNAME=$(az acr credential show --name $(acrName) --query username -o tsv)
+                      ACR_PASSWORD=$(az acr credential show --name $(acrName) --query "passwords[0].value" -o tsv)
+
+                      az container create \
+                        --resource-group rg-pipeline-training \
+                        --name dashboard-dev-<teilnehmernr> \
+                        --image $(acrLoginServer)/$(imageName):$(imageTag) \
+                        --registry-login-server $(acrLoginServer) \
+                        --registry-username $ACR_USERNAME \
+                        --registry-password $ACR_PASSWORD \
+                        --dns-name-label dashboard-dev-<teilnehmernr> \
+                        --ports 80 \
+                        --environment-variables \
+                          APP_VERSION=$(imageTag) \
+                          ENVIRONMENT=dev \
+                        --output table
+
+                # Anforderung 5: Health Check
+                - template: templates/health-check.yml    # Anforderung 8
+                  parameters:
+                    url: 'http://dashboard-dev-<teilnehmernr>.westeurope.azurecontainer.io/health'
+
+  # ===== Stage 4: Deploy Production (Bonus) =====    # Anforderung 7
+  - stage: DeployProduction
+    displayName: 'Deploy Production'
+    dependsOn: DeployDev
+    jobs:
+      - deployment: DeployToProduction
+        displayName: 'Deploy to Production'
+        pool:
+          vmImage: 'ubuntu-latest'
+        environment: 'production'                      # Approval Gate hier konfiguriert
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureCLI@2
+                  displayName: 'Deploy auf ACI'
+                  inputs:
+                    azureSubscription: 'azure-training-connection'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      ACR_USERNAME=$(az acr credential show --name $(acrName) --query username -o tsv)
+                      ACR_PASSWORD=$(az acr credential show --name $(acrName) --query "passwords[0].value" -o tsv)
+
+                      az container create \
+                        --resource-group rg-pipeline-training \
+                        --name dashboard-prod-<teilnehmernr> \
+                        --image $(acrLoginServer)/$(imageName):$(imageTag) \
+                        --registry-login-server $(acrLoginServer) \
+                        --registry-username $ACR_USERNAME \
+                        --registry-password $ACR_PASSWORD \
+                        --dns-name-label dashboard-prod-<teilnehmernr> \
+                        --ports 80 \
+                        --environment-variables \
+                          APP_VERSION=$(imageTag) \
+                          ENVIRONMENT=$(ENVIRONMENT) \
+                        --output table
+
+                - template: templates/health-check.yml
+                  parameters:
+                    url: 'http://dashboard-prod-<teilnehmernr>.westeurope.azurecontainer.io/health'

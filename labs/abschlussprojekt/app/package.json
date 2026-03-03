@@ -1,0 +1,10 @@
+{
+  "name": "team-dashboard",
+  "version": "1.0.0",
+  "description": "Team Status Dashboard — Abschlussprojekt",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/test.js"
+  }
+}
