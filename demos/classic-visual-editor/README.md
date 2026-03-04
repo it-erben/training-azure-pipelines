@@ -28,9 +28,9 @@ weiterhin ausschließlich mit YAML-Pipelines.
 - Azure-DevOps-Organisation **iterben** mit Zugang zum Projekt
 - Repository **hello-pipeline** (angelegt in Lab 01/02) mit mindestens einer
   Datei im `main`-Branch
-- **Bei aktuellen Versionen von Azure DevOps müssen Classic Pipelines erst 
+- **Bei aktuellen Versionen von Azure DevOps müssen Classic Pipelines erst
   aktiviert werden**. Dies geht über die **Settings** der Organisation im
-  Menüpunkt **Pipelines > Settings**. Dort sind zwei Schalter, die 
+  Menüpunkt **Pipelines > Settings**. Dort sind zwei Schalter, die
   standardmäßig Classic Pipelines deaktiveren. Diese Schalter müssen
   **ausgeschaltet** werden.
 
