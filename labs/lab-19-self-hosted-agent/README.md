@@ -244,7 +244,7 @@ stages:
               Write-Host "Installierte Tools:"
               @("git", "node", "python", "docker") | ForEach-Object {
                 $cmd = Get-Command $_ -ErrorAction SilentlyContinue
-                if ($cmd) { Write-Host "$_: $(& $_ --version 2>&1)" }
+                if ($cmd) { Write-Host "${_}: $(& $_ --version 2>&1)" }
                 else { Write-Host "$($_): nicht installiert" }
               }
             displayName: 'Installierte Tools (Windows)'
