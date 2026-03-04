@@ -33,14 +33,7 @@ Teste die App dann lokal:
 npm test
 ```
 
-Alle Tests sollten grün sein. Optional kannst du auch den Docker-Build lokal
-testen:
-
-```bash
-docker build -t team-dashboard .
-docker run -p 8080:80 team-dashboard
-# Öffne http://localhost:8080 im Browser
-```
+Alle Tests sollten grün sein.
 
 ## Anforderungen
 
@@ -61,30 +54,14 @@ die folgende Anforderungen erfüllt:
 ### Details zu den Anforderungen
 
 **Anforderung 3 — Docker-Image**: Das Dockerfile liegt unter `app/Dockerfile`.
-Setze im `Docker@2`-Task den `buildContext` auf `app`. Verwende
+Setze im `Docker@2`-Task den `buildContext` auf `app` - das bedeutet, dass das
+Verzeichnis `app` nach der Dockerfile durchsucht wird. Verwende
 `<dein-acr-name>` wie in Lab 08.
 
 **Anforderung 4 — ACI-Deployment**: Deploye den Container mit `az container
-create` auf Azure Container Instances. Verwende einen eindeutigen Container-
-und DNS-Namen (z. B. `dashboard-dev-<teilnehmernr>`). Um das Docker-Image aus
-der ACR zu pullen, brauchst du die ACR-Credentials:
-
-**Bash:**
-
-```bash
-ACR_USERNAME=$(az acr credential show --name <dein-acr-name> --query username -o tsv)
-ACR_PASSWORD=$(az acr credential show --name <dein-acr-name> --query "passwords[0].value" -o tsv)
-```
-
-**PowerShell:**
-
-```powershell
-$ACR_USERNAME = (az acr credential show --name <dein-acr-name> --query username -o tsv)
-$ACR_PASSWORD = (az acr credential show --name <dein-acr-name> --query "passwords[0].value" -o tsv)
-```
-
-Übergib diese Credentials an `az container create` mit `--registry-login-server`,
-`--registry-username` und `--registry-password`.
+create` auf Azure Container Instances. Bediene dich dabei an Aufgabe 13b.
+Verwende einen eindeutigen Container-
+und DNS-Namen (z. B. `dashboard-dev-<teilnehmernr>`). 
 
 **Anforderung 5 — Health Check**: Nach dem Deployment ist die App unter
 `http://<dns-name-label>.westeurope.azurecontainer.io` erreichbar. Prüfe den
@@ -92,26 +69,6 @@ $ACR_PASSWORD = (az acr credential show --name <dein-acr-name> --query "password
 
 **Anforderung 6 — Variable Group**: Erstelle eine Variable Group
 `dashboard-config` mit mindestens einer Variable (z. B. `ENVIRONMENT=production`):
-
-**Bash:**
-
-```bash
-az pipelines variable-group create \
-  --name "dashboard-config" \
-  --variables ENVIRONMENT=production \
-  --authorize true \
-  --output table
-```
-
-**PowerShell:**
-
-```powershell
-az pipelines variable-group create `
-  --name "dashboard-config" `
-  --variables ENVIRONMENT=production `
-  --authorize true `
-  --output table
-```
 
 Binde die Variable Group in der Pipeline mit `- group: dashboard-config` ein.
 
@@ -123,31 +80,3 @@ Deploy-Stage hinzu, die auf dieses Environment deployt.
 eigene Datei `templates/health-check.yml` aus und binde sie mit `template:` ein
 (siehe Lab 20). Da das Template im selben Repository liegt, brauchst du kein
 `resources.repositories`.
-
-## Hinweise
-
-- **Du darfst in den bisherigen Labs nachschauen** — das ist kein Gedächtnistest,
-  sondern eine Integrationsübung.
-- **Fang einfach an** und arbeite dich durch die Anforderungen:
-  1. Trigger und eine leere Pipeline (Anforderung 1)
-  2. Test-Stage mit `npm test` (Anforderung 2)
-  3. Docker Build and Push (Anforderung 3)
-  4. ACI-Deployment mit Deployment Job (Anforderung 4)
-  5. Health Check nach dem Deployment (Anforderung 5)
-  6. Variable Group einbinden (Anforderung 6)
-  7. Production-Stage mit Approval Gate (Anforderung 7, Bonus)
-  8. Health Check als Template auslagern (Anforderung 8, Bonus)
-- **Committe nach jedem Zwischenschritt** und prüfe, ob die Pipeline
-  durchläuft. So findest du Fehler früh.
-- Denke daran, dass `npm test` im Verzeichnis `app/` laufen muss
-  (`workingDirectory: app`).
-
-## Lösung
-
-> Versuche es erst selbst! Die Lösung hilft dir am meisten, wenn du vorher
-> schon eigene Versuche unternommen hast.
-
-Die Musterlösung findest du unter
-[`loesung/azure-pipelines.yml`](loesung/azure-pipelines.yml). Sie enthält auch
-ein Health-Check-Template unter
-[`loesung/templates/health-check.yml`](loesung/templates/health-check.yml).
