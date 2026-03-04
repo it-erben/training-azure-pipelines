@@ -71,13 +71,12 @@ az devops configure --defaults \
 | [Lab 17](labs/lab-17-bicep/) | Bicep-Deployments | Advanced | 30 Min |
 | [Lab 18](labs/lab-18-drift-detection/) | Infrastructure Drift Detection | Advanced | 30 Min |
 
-### Fortgeschrittene Themen (Labs 19-21)
+### Fortgeschrittene Themen (Labs 19-20)
 
 | Lab | Titel | Schwierigkeit | Zeitbedarf |
 |-----|-------|---------------|------------|
 | [Lab 19](labs/lab-19-self-hosted-agent/) | Self-hosted Agent auf Linux einrichten | Advanced | 35 Min |
 | [Lab 20](labs/lab-20-templates/) | Pipeline-Templates und Wiederverwendung | Advanced | 35 Min |
-| [Lab 21](labs/lab-21-security-scanning/) | Security Scanning (SAST, Dependency Checks) | Advanced | 35 Min |
 
 **Gesamtzeit**: ca. 10 Stunden (bei durchschnittlichem Tempo)
 

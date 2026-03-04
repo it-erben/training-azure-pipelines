@@ -58,4 +58,3 @@ Mit *optional* markierte Labs sind Zusatzaufgaben für schnelle Teilnehmer oder 
 | **08** | Infrastructure as Code (Forts.) | Lab 18: Infrastructure Drift Detection *(optional)* | 1h |
 | **09** | Fortgeschrittene Themen | Lab 20: Pipeline-Templates und Wiederverwendung | 2h |
 | | | Lab 19: Self-hosted Agent auf Linux | |
-| | | Lab 21: Security Scanning *(optional)* | |

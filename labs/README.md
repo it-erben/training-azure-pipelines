@@ -66,7 +66,6 @@
 |-----|-------|---------------|-------|
 | [Lab 19](lab-19-self-hosted-agent/) | Self-hosted Agent einrichten | Advanced | 35 Min |
 | [Lab 20](lab-20-templates/) | Pipeline-Templates und Wiederverwendung | Advanced | 35 Min |
-| [Lab 21](lab-21-security-scanning/) | Security Scanning (SAST, Dependency Checks) | Advanced | 35 Min |
 
 ## Abschlussprojekt
 
