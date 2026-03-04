@@ -182,7 +182,7 @@ const server = http.createServer((req, res) => {
     <!DOCTYPE html>
     <html>
     <head><title>Hello Pipeline - v${APP_VERSION}</title></head>
-    <body style="font-family: Arial; padding: 40px; background: ${SLOT_NAME === 'staging' ? '#d4edda' : '#cce5ff'};">
+    <body style="font-family: Arial; padding: 40px;">
       <h1>Hello from Azure Pipelines!</h1>
       <p><strong>Version:</strong> ${APP_VERSION}</p>
       <p><strong>Slot:</strong> ${SLOT_NAME}</p>
@@ -204,10 +204,6 @@ Der Server liest zwei Umgebungsvariablen:
 - **`SLOT_NAME`**: Der Name des Slots (`staging` oder `production`). Wird
   **nicht** von der Pipeline gesetzt, sondern kommt aus dem slot-sticky
   App-Setting, das wir in Schritt 1 konfiguriert haben.
-
-Die Hauptseite zeigt je nach Slot eine unterschiedliche Hintergrundfarbe:
-**Grün für Staging (Green)**, **Blau für Production (Blue)**. So siehst du im
-Browser auf einen Blick, welcher Slot gerade aktiv ist.
 
 ### Schritt 3: Version 1 nach Production deployen
 
@@ -240,8 +236,8 @@ Du solltest diese Antwort sehen:
 ```
 
 Öffne auch `https://<app-name>.azurewebsites.net` im Browser: Du siehst die
-Seite mit **blauem Hintergrund**, dem Titel "Hello from Azure Pipelines!" und
-`Slot: production`. Das ist deine stabile Blue-Version.
+Seite mit dem Titel "Hello from Azure Pipelines!" und `Slot: production`.
+Das ist deine stabile Blue-Version.
 
 ### Schritt 4: Code für Version 2 ändern
 
@@ -492,10 +488,10 @@ Invoke-RestMethod https://$APP_NAME-staging.azurewebsites.net/health
 Öffne beide URLs auch im Browser, am besten in einer **privaten Sitzung**,
 damit kein Caching greift:
 
-- **Production** (`<app>.azurewebsites.net`): Blauer Hintergrund, Titel "Hello
-  from Azure Pipelines!", `version: 1.0.0`, `slot: production`.
-- **Staging** (`<app>-staging.azurewebsites.net`): Grüner Hintergrund, Titel
-  "Hello from Azure Pipelines v2!", `version: 1.0.XX`, `slot: staging`.
+- **Production** (`<app>.azurewebsites.net`): Titel "Hello from Azure Pipelines!",
+  `version: 1.0.0`, `slot: production`.
+- **Staging** (`<app>-staging.azurewebsites.net`): Titel "Hello from Azure
+  Pipelines v2!", `version: 1.0.XX`, `slot: staging`.
 
 Du siehst zwei verschiedene Versionen gleichzeitig - die alte und die neue. Die
 Produktion ist zu keinem Zeitpunkt gestört. Erst wenn du den Swap freigibst,
@@ -534,9 +530,9 @@ Erwartete Ergebnisse:
 - **Staging**: `version: 1.0.0`, `slot: staging` - die alte Version ist im
   Staging-Slot gelandet, bereit für einen sofortigen Rollback.
 
-Im Browser siehst du: Production hat weiterhin einen **blauen** Hintergrund und
-Staging einen **grünen** - obwohl der Code getauscht wurde. Die Farbe folgt dem
-Slot, nicht dem Code, weil `SLOT_NAME` slot-sticky ist.
+Im Browser siehst du: Production zeigt `slot: production` und Staging zeigt
+`slot: staging` - obwohl der Code getauscht wurde. `SLOT_NAME` folgt dem Slot,
+nicht dem Code, weil es als slot-sticky Setting konfiguriert ist.
 
 ### Schritt 9: Rollback testen
 
