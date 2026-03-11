@@ -61,7 +61,7 @@ Verzeichnis `app` nach der Dockerfile durchsucht wird. Verwende
 **Anforderung 4 — ACI-Deployment**: Deploye den Container mit `az container
 create` auf Azure Container Instances. Bediene dich dabei an Aufgabe 13b.
 Verwende einen eindeutigen Container-
-und DNS-Namen (z. B. `dashboard-dev-<teilnehmernr>`). 
+und DNS-Namen (z. B. `dashboard-dev-<teilnehmernr>`).
 
 **Anforderung 5 — Health Check**: Nach dem Deployment ist die App unter
 `http://<dns-name-label>.westeurope.azurecontainer.io` erreichbar. Prüfe den
