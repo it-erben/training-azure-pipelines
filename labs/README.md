@@ -71,4 +71,4 @@
 
 | Lab | Titel | Schwierigkeit | ~Zeit |
 |-----|-------|---------------|-------|
-| [Abschlussprojekt](abschlussprojekt/) | Pipeline Challenge — Eigenständig eine CI/CD-Pipeline bauen | Intermediate | 60-90 Min |
+| [Abschlussprojekt](../abschlussprojekt/) | Pipeline Challenge — Eigenständig eine CI/CD-Pipeline bauen | Intermediate | 60-90 Min |
