@@ -186,3 +186,8 @@ Dreitägige Schulung „Azure DevOps Pipelines“, neun Module und 22 Labs.
   Dateien brechen bei rund 80 um; dabei bleiben.
 - **Die Linter-Einstellungen stehen doppelt**, in `.gitlab-ci.yml` über die
   Komponenten und lokal in `.pre-commit-config.yaml`. Beide synchron halten.
+- **Die CI läuft auf zwei Plattformen.** `.gitlab-ci.yml` bindet die
+  GitLab-Komponenten ein, `.github/workflows/ci.yml` ruft `lint.yml`,
+  `slides.yml`, `release.yml` und `pages.yml` aus
+  `it-erben/ci`. Die PDFs gehen dort auf
+  GitHub Pages, ein Deployment gibt es auf GitHub nicht.
